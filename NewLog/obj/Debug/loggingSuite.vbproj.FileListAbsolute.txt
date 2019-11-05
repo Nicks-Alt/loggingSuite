@@ -1,0 +1,51 @@
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\loggingSuite.exe.config
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\loggingSuite.exe.manifest
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\loggingSuite.application
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\loggingSuite.exe
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\loggingSuite.pdb
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\loggingSuite.xml
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\Newtonsoft.Json.dll
+E:\Programming - TECH\VB\loggingSuite\NewLog\bin\Debug\Newtonsoft.Json.xml
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.vbprojAssemblyReference.cache
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\Interop.micautLib.dll
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.vbproj.ResolveComReference.cache
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.frmLoggingSuite.resources
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.frmSetTimePicker.resources
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.frmShutdownTimer.resources
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.frmUpdateAvailable.resources
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.Resources.resources
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.vbproj.GenerateResource.cache
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.TrustInfo.xml
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.exe.manifest
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.application
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.vbproj.CopyComplete
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.exe
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.xml
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.pdb
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.frmAdmin.resources
+E:\Programming - TECH\VB\loggingSuite\NewLog\obj\Debug\loggingSuite.frmAdminLogin.resources
+G:\repos\loggingSuite\NewLog\bin\Debug\loggingSuite.exe.config
+G:\repos\loggingSuite\NewLog\obj\Debug\Interop.micautLib.dll
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.vbproj.ResolveComReference.cache
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.exe
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.xml
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.pdb
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.frmAdmin.resources
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.frmAdminLogin.resources
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.frmLoggingSuite.resources
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.frmSetTimePicker.resources
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.Resources.resources
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.vbproj.GenerateResource.Cache
+G:\repos\loggingSuite\NewLog\bin\Debug\loggingSuite.exe.manifest
+G:\repos\loggingSuite\NewLog\bin\Debug\loggingSuite.application
+G:\repos\loggingSuite\NewLog\bin\Debug\loggingSuite.exe
+G:\repos\loggingSuite\NewLog\bin\Debug\loggingSuite.pdb
+G:\repos\loggingSuite\NewLog\bin\Debug\loggingSuite.xml
+G:\repos\loggingSuite\NewLog\bin\Debug\Newtonsoft.Json.dll
+G:\repos\loggingSuite\NewLog\bin\Debug\Newtonsoft.Json.xml
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.TrustInfo.xml
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.exe.manifest
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.application
+G:\repos\loggingSuite\NewLog\obj\Debug\Interop.IWshRuntimeLibrary.dll
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.SplashScreen1.resources
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.vbprojResolveAssemblyReference.cache
