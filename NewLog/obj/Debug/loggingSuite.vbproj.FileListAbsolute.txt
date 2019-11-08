@@ -49,3 +49,4 @@ G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.application
 G:\repos\loggingSuite\NewLog\obj\Debug\Interop.IWshRuntimeLibrary.dll
 G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.SplashScreen1.resources
 G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.vbprojResolveAssemblyReference.cache
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.frmComments.resources

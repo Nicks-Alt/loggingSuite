@@ -15,6 +15,7 @@ Public Class frmLoggingSuite
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private blnWebException As Boolean
     Private NormalSize As Size
+    Friend commentFileNames As New List(Of FileInfo)
     Private Sub LoadInformation()
         If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\loggingSuite.exe") Then
             IO.File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\loggingSuite.exe")
@@ -149,15 +150,42 @@ Public Class frmLoggingSuite
         'updatecheck()
         DateTimePicker1.MaxDate = New Date(Now.Ticks)
         DateTimePicker1.MinDate = New Date(Now.Ticks - 6048000000000) ' 6048000000000 = 1 week in ticks
-        If Now.DayOfWeek <> DayOfWeek.Monday Then
+        Check4Comments()
+    End Sub
+    Private Sub Check4Comments()
+        commentFileNames.Clear()
+        If Now.DayOfWeek <> DayOfWeek.Monday And Now.DayOfWeek <> DayOfWeek.Sunday And Now.DayOfWeek <> DayOfWeek.Saturday Then ' Previous Day comment check
             If IO.File.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.AddDays(-1).ToLongDateString + " " + "Comments.txt") Then
                 commentWarning.Visible = True
                 Dim tt As New ToolTip()
                 tt.SetToolTip(commentWarning, "You have 1 new comment.")
                 tt.ToolTipIcon = ToolTipIcon.Info
+                My.Computer.Audio.PlaySystemSound(Media.SystemSounds.Asterisk)
+                commentFileNames.Add(New FileInfo("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.AddDays(-1).ToLongDateString + " " + "Comments.txt"))
             Else
                 commentWarning.Visible = False
             End If
+        Else
+            If IO.File.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.AddDays(-7).ToLongDateString + "\" + Now.AddDays((-((Today.DayOfWeek - DayOfWeek.Friday) - 7))).ToLongDateString + " " + "Comments.txt") Then
+                commentWarning.Visible = True
+                Dim tt As New ToolTip()
+                tt.SetToolTip(commentWarning, "You have 1 new comment.")
+                tt.ToolTipIcon = ToolTipIcon.Info
+                My.Computer.Audio.PlaySystemSound(Media.SystemSounds.Asterisk)
+                commentFileNames.Add(New FileInfo("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.AddDays(-7).ToLongDateString + "\" + Now.AddDays((-((Today.DayOfWeek - DayOfWeek.Friday) - 7))).ToLongDateString + " " + "Comments.txt"))
+            Else
+                commentWarning.Visible = False
+            End If
+        End If
+        If IO.File.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.ToLongDateString + " " + "Comments.txt") Then
+            commentWarning.Visible = True
+            Dim tt As New ToolTip()
+            tt.SetToolTip(commentWarning, "You have 1 new comment.")
+            tt.ToolTipIcon = ToolTipIcon.Info
+            My.Computer.Audio.PlaySystemSound(Media.SystemSounds.Asterisk)
+            commentFileNames.Add(New FileInfo("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.ToLongDateString + " " + "Comments.txt"))
+        Else
+            commentWarning.Visible = False
         End If
     End Sub
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
@@ -172,10 +200,11 @@ Public Class frmLoggingSuite
             btnAbortShutdown.Visible = True
             Me.Activate()
         End If
+        Check4Comments()
     End Sub
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
         Dim strLogs As String
-        Dim objReader As New IO.StreamReader(logFolderName & "\Logs.txt")
+        Dim objReader As New StreamReader(logFolderName & "\Logs.txt")
         strLogs = objReader.ReadToEnd
         Clipboard.SetText("------------------- AUTOMATICALLY GENERATED LOG -------------------" & Environment.NewLine & strLogs & Environment.NewLine & "GENERATED ON: " & DateTimePicker1.Value.ToLongDateString & " @ " & DateTimePicker1.Value.ToLongTimeString)
         MsgBox("Log Copied to Clipboard", vbInformation, "Text Copied")
@@ -388,10 +417,8 @@ Public Class frmLoggingSuite
         goalWriter.Close()
     End Sub
     Private Sub frmLoggingSuite_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        Timer1.Stop()
         lblClock.Text = Now.ToShortTimeString
         If Date.Parse(lblClock.Text) < Date.Parse(lblReminderText.Text) Then
-            Timer1.Stop()
             NotifyIcon1.Visible = True
             NotifyIcon1.Icon = My.Resources.icon
             NotifyIcon1.BalloonTipTitle = "Logging Suite"
@@ -529,10 +556,12 @@ Public Class frmLoggingSuite
     End Sub
 
     Private Sub commentWarning_Click(sender As Object, e As EventArgs) Handles commentWarning.Click
-        Dim sr As New IO.StreamReader("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.AddDays(-1).ToLongDateString + " " + "Comments.txt")
-        MsgBox(sr.ReadToEnd, MsgBoxStyle.Information, "Comments")
-        sr.Close()
-        IO.File.Delete("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.AddDays(-1).ToLongDateString + " " + "Comments.txt") ' Delete file to save space since it is already viewed
-        commentWarning.Visible = False
+        Dim parseResult As Date
+        For Each fileName In commentFileNames
+            If fileName.Name.Contains("Comments") And Date.TryParse(fileName.Name.Substring(0, InStrRev(fileName.Name, " ")), parseResult) Then
+                frmComments.lstComments.Items.Add(fileName.Name.Substring(0, fileName.Name.IndexOf(".txt")))
+            End If
+        Next
+        frmComments.ShowDialog()
     End Sub
 End Class

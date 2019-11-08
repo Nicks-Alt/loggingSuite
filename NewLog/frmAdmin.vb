@@ -118,6 +118,7 @@ Public Class frmAdmin
                 objCommentWriter.Write(comment)
                 objCommentWriter.Close()
                 blnCancel = True
+                btnComments.Enabled = True
             Else
                 If MsgBox("Are you sure you want to cancel?", vbYesNo, "Cancel?") = MsgBoxResult.Yes Then
                     blnCancel = True

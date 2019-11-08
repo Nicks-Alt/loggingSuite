@@ -137,6 +137,12 @@
     <Compile Include="frmAdminLogin.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmComments.Designer.vb">
+      <DependentUpon>frmComments.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmComments.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmLoggingSuite.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -178,6 +184,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmAdminLogin.resx">
       <DependentUpon>frmAdminLogin.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmComments.resx">
+      <DependentUpon>frmComments.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmLoggingSuite.resx">
       <DependentUpon>frmLoggingSuite.vb</DependentUpon>

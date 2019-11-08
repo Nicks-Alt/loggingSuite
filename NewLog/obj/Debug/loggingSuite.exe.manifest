@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="loggingSuite.exe" size="1460736">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="loggingSuite.exe" size="1464832">
       <assemblyIdentity name="loggingSuite" version="3.0.1.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>3REluGGcoM6UT6MoCzoahFxdZCkw8oq5Sv7kziunOhc=</dsig:DigestValue>
+        <dsig:DigestValue>RgYpzzXP4nnMC+drpfIDewfA3Fs8+VdSONDXJZfScew=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
