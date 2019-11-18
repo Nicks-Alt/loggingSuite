@@ -1,34 +1,31 @@
-﻿Public Class frmComments
+﻿Imports System.Data.OleDb
+
+Public Class frmComments
+    Private con As OleDbConnection = frmLoggingSuite.con
+    Private commentTable As New DataTable
     Private Sub btnCancel_Click(sender As Object, e As EventArgs) Handles btnCancel.Click
         Hide()
     End Sub
     Private Sub lstComments_DoubleClick(sender As Object, e As EventArgs) Handles lstComments.DoubleClick
         If lstComments.SelectedIndex <> -1 Then
-            Dim sr As New IO.StreamReader("P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\" + frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).Name)
-            MsgBox(sr.ReadToEnd, MsgBoxStyle.Information, "Comments")
-            sr.Close()
-            If IO.Directory.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\Comments") = False Then
-                IO.Directory.CreateDirectory("P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\Comments")
-            End If
-            Try
-                IO.File.Move(frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).FullName, "P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\Comments\" + frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).Name) ' Delete file to save space since it is already viewed
-            Catch ex As IO.FileNotFoundException
-                IO.File.Move(frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).FullName, "P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.AddDays(-7).ToLongDateString() + "\Comments\" + frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).Name) ' Delete file to save space since it is already viewed
-            Catch ex As IO.IOException
-                IO.File.Delete("P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\Comments\" + frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).Name)
-                IO.File.Move(frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).FullName, "P:\Weekly Logs\" + Environment.UserName + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\Comments\" + frmLoggingSuite.commentFileNames.Item(lstComments.SelectedIndex).Name) ' Delete file to save space since it is already viewed
-            End Try
+            Dim updateCmd As New OleDbCommand("UPDATE Comments SET [_Read] = '1' WHERE [_CommentID] LIKE '" + commentTable.Rows(lstComments.SelectedIndex).Item(0).ToString + "'", con)
+            updateCmd.ExecuteNonQuery()
             frmLoggingSuite.commentWarning.Visible = False
-            frmLoggingSuite.commentFileNames.RemoveAt(lstComments.SelectedIndex)
+            MsgBox(commentTable.Rows(lstComments.SelectedIndex).Item(3).ToString, MsgBoxStyle.Information, "Comment #" + (lstComments.SelectedIndex + 1).ToString)
+            commentTable.Rows.Clear()
             lstComments.Items.RemoveAt(lstComments.SelectedIndex)
+            frmComments_Shown(Me, New EventArgs)
         End If
     End Sub
 
     Private Sub frmComments_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
-        Dim i As Integer
-        For Each item In lstComments.Items
+        Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Read] LIKE '0'", con)
 
-            ' Wont let me change the name of the file
+        commentAdapter.Fill(commentTable)
+        Dim strComments As New List(Of Object)
+        For i = 0 To commentTable.Rows.Count - 1 ' Row loop
+            strComments.Add("Comment #" + (i + 1).ToString + ": " + Date.Parse(commentTable.Rows(i).Item(2).ToString).ToShortDateString)
         Next
+        lstComments.Items.AddRange(strComments.ToArray())
     End Sub
 End Class

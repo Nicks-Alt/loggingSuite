@@ -13,10 +13,10 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Private con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source='Database.mdb';Jet OLEDB:Database Password='Epsilon'")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source='Database.mdb';Jet OLEDB:Database Password='Epsilon'")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
-    Friend commentFileNames As New List(Of FileInfo)
+    'Friend commentFileNames As New List(Of FileInfo)
     'TODO: https://github.com/nicksuperiorservers/loggingSuite/issues
     Private Sub LoadInformation()
         If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\loggingSuite.exe") Then
@@ -43,14 +43,19 @@ Public Class frmLoggingSuite
         End If
         objectiveTable.Rows.Clear()
         objectiveAdapter.Fill(objectiveTable)
-        For i = 2 To objectiveTable.Columns.Count - 1
-            If objectiveTable.Rows(0).Item(i).ToString = "" Then
-                lstDailyObjectives.Items.Add("Absent.")
-            Else
-                lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
-            End If
-        Next
+        Try
+            For i = 2 To Now.DayOfWeek + 1
+                If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
+                    lstDailyObjectives.Items.Add("Absent.")
+                Else
+                    lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
+                End If
+            Next
+        Catch ex As Exception
 
+            MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
 
         Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con) ' Select the row if it exists
         Dim goalTable As New DataTable
@@ -99,6 +104,11 @@ Public Class frmLoggingSuite
             SaveGoal()
         End If
         Dim currentIndex As Integer
+        For i = 0 To lstDailyObjectives.Items.Count - 1
+            If lstDailyObjectives.Items.Item(i).ToString = "" Then
+                lstDailyObjectives.Items.RemoveAt(i)
+            End If
+        Next
         If lstDailyObjectives.Items.Count < Now.DayOfWeek Then
             Dim dailyObj As String
             Dim i As Boolean
@@ -114,7 +124,7 @@ Public Class frmLoggingSuite
                     i = False
                 End If
             Loop While i
-            lstDailyObjectives.Items.AddRange({"Absent.", "Absent.", "Absent.", "Absent.", "Absent."})
+            'lstDailyObjectives.Items.AddRange({"Absent.", "Absent.", "Absent.", "Absent.", "Absent."})
             Select Case Today.DayOfWeek
                 Case DayOfWeek.Monday
                     lstDailyObjectives.Items.Insert(0, dailyObj)
@@ -122,25 +132,25 @@ Public Class frmLoggingSuite
                 Case DayOfWeek.Tuesday
 
                     lstDailyObjectives.Items.Insert(1, dailyObj)
-                    lstDailyObjectives.Items.RemoveAt(2)
+                    'lstDailyObjectives.Items.RemoveAt(2)
                     currentIndex = 2
                 Case DayOfWeek.Wednesday
                     lstDailyObjectives.Items.Insert(2, dailyObj)
-                    lstDailyObjectives.Items.RemoveAt(3)
+                    'lstDailyObjectives.Items.RemoveAt(3)
                     currentIndex = 3
                 Case DayOfWeek.Thursday
                     lstDailyObjectives.Items.Insert(3, dailyObj)
-                    lstDailyObjectives.Items.RemoveAt(4)
+                    'lstDailyObjectives.Items.RemoveAt(4)
                     currentIndex = 4
                 Case DayOfWeek.Friday
                     lstDailyObjectives.Items.Insert(4, dailyObj)
-                    lstDailyObjectives.Items.RemoveAt(5)
+                    'lstDailyObjectives.Items.RemoveAt(5)
                     currentIndex = 5
             End Select
         End If
-        For temp = lstDailyObjectives.Items.Count To Now.DayOfWeek Step -1
-            lstDailyObjectives.Items.RemoveAt(temp - 1)
-        Next
+        'For temp = lstDailyObjectives.Items.Count To Now.DayOfWeek Step -1
+        '    lstDailyObjectives.Items.RemoveAt(temp - 1)
+        'Next
         SaveObjectives()
         currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
         If IO.File.Exists(reminderConfigFileName) = False Then
@@ -163,37 +173,11 @@ Public Class frmLoggingSuite
         'Check4Comments()
     End Sub
     Private Sub Check4Comments()
-        commentFileNames.Clear()
-        If Now.DayOfWeek <> DayOfWeek.Monday And Now.DayOfWeek <> DayOfWeek.Sunday And Now.DayOfWeek <> DayOfWeek.Saturday Then ' Previous Day comment check
-            If IO.File.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.AddDays(-1).ToLongDateString + " " + "Comments.txt") Then
-                commentWarning.Visible = True
-                Dim tt As New ToolTip()
-                tt.SetToolTip(commentWarning, "You have 1 new comment.")
-                tt.ToolTipIcon = ToolTipIcon.Info
-                My.Computer.Audio.PlaySystemSound(Media.SystemSounds.Asterisk)
-                commentFileNames.Add(New FileInfo("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.AddDays(-1).ToLongDateString + " " + "Comments.txt"))
-            Else
-                commentWarning.Visible = False
-            End If
-        Else
-            If IO.File.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.AddDays(-7).ToLongDateString + "\" + Now.AddDays((-((Today.DayOfWeek - DayOfWeek.Friday) - 7))).ToLongDateString + " " + "Comments.txt") Then
-                commentWarning.Visible = True
-                Dim tt As New ToolTip()
-                tt.SetToolTip(commentWarning, "You have 1 new comment.")
-                tt.ToolTipIcon = ToolTipIcon.Info
-                My.Computer.Audio.PlaySystemSound(Media.SystemSounds.Asterisk)
-                commentFileNames.Add(New FileInfo("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.AddDays(-7).ToLongDateString + "\" + Now.AddDays((-((Today.DayOfWeek - DayOfWeek.Friday) - 7))).ToLongDateString + " " + "Comments.txt"))
-            Else
-                commentWarning.Visible = False
-            End If
-        End If
-        If IO.File.Exists("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.ToLongDateString + " " + "Comments.txt") Then
+        Dim commentTable As New DataTable
+        Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Read] LIKE '0'", con)
+        commentAdapter.Fill(commentTable)
+        If commentTable.Rows.Count <> 0 Then
             commentWarning.Visible = True
-            Dim tt As New ToolTip()
-            tt.SetToolTip(commentWarning, "You have 1 new comment.")
-            tt.ToolTipIcon = ToolTipIcon.Info
-            My.Computer.Audio.PlaySystemSound(Media.SystemSounds.Asterisk)
-            commentFileNames.Add(New FileInfo("P:\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString() + "\" + Now.ToLongDateString + " " + "Comments.txt"))
         Else
             commentWarning.Visible = False
         End If
@@ -228,22 +212,20 @@ Public Class frmLoggingSuite
         txtInput.Clear()
     End Sub
     Private Sub btnRead_Click(sender As Object, e As EventArgs) Handles btnRead.Click
-        'Dim strLogs As String
-        'If IO.File.Exists(logFolderName + "\Logs.txt") Then
-        '    Dim objReader As New IO.StreamReader(logFolderName & "\Logs.txt")
-        '    strLogs = objReader.ReadToEnd
-        '    MsgBox(strLogs, MsgBoxStyle.Information, "Logs(" & currentMonday.ToLongDateString & ")") ' Since .txt is 4 characters, subtract 4 from total length
-        '    objReader.Close()
-        'Else
-        '    MsgBox("", MsgBoxStyle.Information, "Logs(" + currentMonday.ToLongDateString + ")")
-        'End If
         Dim strLogs As String
         Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
         Dim logTable As New DataTable
         logAdapter.Fill(logTable)       'Zero Based v
-        currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
+        currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
+        Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.AddDays(7).ToShortDateString + "'", con)
+        Dim goalTable As New DataTable
+        goalAdapter.Fill(goalTable)
         strLogs = currentMonday.ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Monday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(1).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Tuesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(2).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Wednesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(3).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Thursday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(4).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Friday - 1)).ToString
+        If goalTable.Rows.Count <> 0 Then
+            strLogs += Environment.NewLine + Environment.NewLine + "GOAL FOR NEXT WEEK: " + goalTable.Rows(0).Item(2).ToString
+        End If
         MsgBox(strLogs, vbInformation, "Logs(" + currentMonday.ToLongDateString + ")")
+        currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     End Sub
     Private Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
         If txtInput.Text.Length > 1 Then
@@ -261,14 +243,16 @@ Public Class frmLoggingSuite
                 Do
                     strGoalEntry = InputBox("Think about a potential goal for next week.", "Goal Entry", " ")
                 Loop Until strGoalEntry.Trim <> ""
-                Dim goalSelectCmd As New OleDbDataAdapter("SELECT * FROM Goal")
-                'Dim objGoalWriter As New IO.StreamWriter(logFolderName + "\Logs.txt", True)
-                'objGoalWriter.WriteLine("GOAL FOR NEXT WEEK: " + strGoalEntry)
-                'objGoalWriter.Close()
-                'IO.Directory.CreateDirectory("P:" + "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.AddDays(7).ToLongDateString)
-                'Dim writeNextGoal As New IO.StreamWriter("P:" + "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.AddDays(7).ToLongDateString + "\Goal.txt")
-                'writeNextGoal.WriteLine(strGoalEntry)
-                'writeNextGoal.Close()
+                Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.AddDays(7).ToShortDateString + "'", con)
+                Dim goalTable As New DataTable
+                goalAdapter.Fill(goalTable)
+                If goalTable.Rows.Count = 0 Then
+                    Dim goalInsertCmd As New OleDbCommand("INSERT INTO Goal (_UName, _MondayDate, _Entry) VALUES ('" + Environment.UserName + "', '" + currentMonday.AddDays(7).ToShortDateString + "', '" + strGoalEntry + "')", con)
+                    goalInsertCmd.ExecuteNonQuery()
+                Else
+                    Dim goalUpdateCmd As New OleDbCommand("UPDATE Goal SET [_Entry] = '" + strGoalEntry + "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.AddDays(7).ToShortDateString + "'", con)
+                    goalUpdateCmd.ExecuteNonQuery()
+                End If
             End If
         End If
     End Sub
@@ -430,21 +414,26 @@ Public Class frmLoggingSuite
         '    i += 1
         'Next
         'objWriter.Close()
-        Dim objectiveCmd As New OleDbCommand
-        objectiveCmd.Connection = con
-        If lstDailyObjectives.Items.Count = 1 Then
-            objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString
-        ElseIf lstDailyObjectives.Items.Count = 2 Then
-            objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString()
-        ElseIf lstDailyObjectives.Items.Count = 3 Then
-            objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString
-        ElseIf lstDailyObjectives.Items.Count = 4 Then
-            objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString
-        ElseIf lstDailyObjectives.Items.Count = 5 Then
-            objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString + "', [_FridayObj] = '" + lstDailyObjectives.Items.Item(4).ToString
-        End If
-        objectiveCmd.CommandText += "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'"
-        objectiveCmd.ExecuteNonQuery()
+        Try
+            Dim objectiveCmd As New OleDbCommand
+            objectiveCmd.Connection = con
+            If lstDailyObjectives.Items.Count = 1 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString
+            ElseIf lstDailyObjectives.Items.Count = 2 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString()
+            ElseIf lstDailyObjectives.Items.Count = 3 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString
+            ElseIf lstDailyObjectives.Items.Count = 4 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString
+            ElseIf lstDailyObjectives.Items.Count = 5 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString + "', [_FridayObj] = '" + lstDailyObjectives.Items.Item(4).ToString
+            End If
+            objectiveCmd.CommandText += "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'"
+            objectiveCmd.ExecuteNonQuery()
+        Catch ex As Exception
+            MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
     End Sub
     Private Sub SaveGoal()
         'logFolderName = "P:\Weekly Logs\" + Environment.UserName + "\" + (Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))).ToLongDateString()
@@ -596,12 +585,6 @@ Public Class frmLoggingSuite
     End Sub
 
     Private Sub commentWarning_Click(sender As Object, e As EventArgs) Handles commentWarning.Click
-        Dim parseResult As Date
-        For Each fileName In commentFileNames
-            If fileName.Name.Contains("Comments") And Date.TryParse(fileName.Name.Substring(0, InStrRev(fileName.Name, " ")), parseResult) Then
-                frmComments.lstComments.Items.Add(fileName.Name.Substring(0, fileName.Name.IndexOf(".txt")))
-            End If
-        Next
         frmComments.ShowDialog()
     End Sub
 End Class

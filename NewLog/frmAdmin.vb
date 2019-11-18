@@ -1,68 +1,99 @@
 ﻿Imports System.IO
+Imports System.Data.OleDb
 
 Public Class frmAdmin
     Private currentMonday As Date = Now.AddDays(-(Now.DayOfWeek - DayOfWeek.Monday))
     Private currentUser As String
-    Private mainPath As String = "P:\Weekly Logs\" + currentUser + "\" + currentMonday.ToLongDateString
-    Private Sub GetDirs()
-        Dim paths As String() = Directory.GetDirectories("P:\Weekly Logs\")
-        Dim i = 0
-        For Each path In paths
-            paths(i) = path.Substring(path.LastIndexOf("\") + 1, path.Length - path.LastIndexOf("\") - 1)
-            i += 1
-        Next
-        lstUsers.Items.AddRange(paths)
-    End Sub
+    Private con As OleDbConnection = frmLoggingSuite.con
     Private Sub frmAdmin_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        GetDirs()
         DateTimePicker1.Value = New Date(Today.Ticks)
         DateTimePicker1.MaxDate = New Date(Now.Ticks)
         DateTimePicker1.MinDate = New Date(Now.Ticks - 6048000000000) ' 6048000000000 ticks is 1 week
+        Dim userAdapter As New OleDbDataAdapter("SELECT * FROM Users", con)
+        Dim userTable As New DataTable
+        userAdapter.Fill(userTable)
+        For i = 0 To userTable.Rows.Count - 1
+            lstUsers.Items.Add(userTable.Rows(i).Item(0))
+        Next
     End Sub
 
     Private Sub lstUsers_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstUsers.SelectedIndexChanged
         If lstUsers.SelectedIndex <> -1 Then
+            lstDailyObjectives.Items.Clear()
+            lstGoalM.Items.Clear()
             btnViewLog.Enabled = True
             currentUser = lstUsers.SelectedItem.ToString
-            mainPath = "P:" + "\Weekly Logs\" + currentUser + "\" + currentMonday.ToLongDateString
-            If File.Exists(mainPath + "\Objectives.txt") Then
-                Dim objReader As New StreamReader(mainPath + "\Objectives.txt")
-                Try
-                    lstDailyObjectives.Items.Clear()
-                    Dim rawObj As String = objReader.ReadToEnd
-                    lstDailyObjectives.Items.AddRange(rawObj.Split(Char.Parse("π")))
-                    objReader.Close()
-                Catch ex As Exception
-                    lstDailyObjectives.Items.Clear()
-                    objReader.Close()
-                End Try
-            Else
-                lstDailyObjectives.Items.Clear()
+            Dim objectiveAdapter As New OleDbDataAdapter("SELECT * FROM Objectives WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+            Dim objectiveTable As New DataTable
+            objectiveAdapter.Fill(objectiveTable)
+            If objectiveTable.Rows.Count = 0 Then
+                Dim objectiveInsert As New OleDbCommand("INSERT INTO Objectives (_UName, _MondayDate) VALUES ('" + lstUsers.SelectedItem.ToString + "', '" + currentMonday.ToShortDateString + "')", con)
+                objectiveInsert.ExecuteNonQuery()
             End If
-            If File.Exists(mainPath + "\Goal.txt") Then
-                Dim goalReader As New StreamReader(mainPath + "\Goal.txt")
-                Try
-                    lstGoalM.Items.Clear()
-                    Dim rawGoal As String = goalReader.ReadLine
-                    lstGoalM.Items.Add(rawGoal)
-                    goalReader.Close()
-                Catch ex As Exception
-                    lstGoalM.Items.Clear()
-                    goalReader.Close()
-                End Try
-            Else
-                lstGoalM.Items.Clear()
+            objectiveTable.Rows.Clear()
+            objectiveAdapter.Fill(objectiveTable)
+            For i = 2 To Now.DayOfWeek + 1
+                If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
+                    lstDailyObjectives.Items.Add("Absent.")
+                Else
+                    lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
+                End If
+            Next
+
+            Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con) ' Select the row if it exists
+            Dim goalTable As New DataTable
+            goalAdapter.Fill(goalTable)
+            If goalTable.Rows.Count = 0 Then
+                Dim goalInsert As New OleDbCommand("INSERT INTO Goal (_Uname, _MondayDate) VALUES ('" + lstUsers.SelectedItem.ToString + "', '" + currentMonday.ToShortDateString + "')", con) ' Insert a row so its available for updating
+                goalInsert.ExecuteNonQuery()
             End If
-            If File.Exists(mainPath + "\" + Now.ToLongDateString + " Comments.txt") Then
-                btnComments.Enabled = True
-            Else
-                btnComments.Enabled = False
+            goalTable.Rows.Clear()
+            goalAdapter.SelectCommand = New OleDbCommand("SELECT [_Entry] FROM Goal WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+            goalAdapter.Fill(goalTable)
+            If goalTable.Rows(0).Item(2).ToString <> "" Then
+                lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
             End If
-            If File.Exists(mainPath + "\Logs.txt") Then
-                btnViewLog.Enabled = True
-            Else
-                btnViewLog.Enabled = False
-            End If
+            'btnViewLog.Enabled = True
+            'currentUser = lstUsers.SelectedItem.ToString
+            'mainPath = "P:" + "\Weekly Logs\" + currentUser + "\" + currentMonday.ToLongDateString
+            'If File.Exists(mainPath + "\Objectives.txt") Then
+            '    Dim objReader As New StreamReader(mainPath + "\Objectives.txt")
+            '    Try
+            '        lstDailyObjectives.Items.Clear()
+            '        Dim rawObj As String = objReader.ReadToEnd
+            '        lstDailyObjectives.Items.AddRange(rawObj.Split(Char.Parse("π")))
+            '        objReader.Close()
+            '    Catch ex As Exception
+            '        lstDailyObjectives.Items.Clear()
+            '        objReader.Close()
+            '    End Try
+            'Else
+            '    lstDailyObjectives.Items.Clear()
+            'End If
+            'If File.Exists(mainPath + "\Goal.txt") Then
+            '    Dim goalReader As New StreamReader(mainPath + "\Goal.txt")
+            '    Try
+            '        lstGoalM.Items.Clear()
+            '        Dim rawGoal As String = goalReader.ReadLine
+            '        lstGoalM.Items.Add(rawGoal)
+            '        goalReader.Close()
+            '    Catch ex As Exception
+            '        lstGoalM.Items.Clear()
+            '        goalReader.Close()
+            '    End Try
+            'Else
+            '    lstGoalM.Items.Clear()
+            'End If
+            'If File.Exists(mainPath + "\" + Now.ToLongDateString + " Comments.txt") Then
+            '    btnComments.Enabled = True
+            'Else
+            '    btnComments.Enabled = False
+            'End If
+            'If File.Exists(mainPath + "\Logs.txt") Then
+            '    btnViewLog.Enabled = True
+            'Else
+            '    btnViewLog.Enabled = False
+            'End If
         Else
             lstDailyObjectives.Items.Clear()
             lstGoalM.Items.Clear()
@@ -72,7 +103,7 @@ Public Class frmAdmin
 
     Private Sub DateTimePicker1_ValueChanged(sender As Object, e As EventArgs) Handles DateTimePicker1.ValueChanged
         currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
-        lstUsers_SelectedIndexChanged(Me, New EventArgs)
+        'lstUsers_SelectedIndexChanged(Me, New EventArgs)
     End Sub
 
     Private Sub lstDailyObjectives_DoubleClick(sender As Object, e As EventArgs) Handles lstDailyObjectives.DoubleClick
@@ -83,19 +114,19 @@ Public Class frmAdmin
         frmLoggingSuite.Show()
     End Sub
 
-    Private Sub btnViewLog_Click(sender As Object, e As EventArgs) Handles btnViewLog.Click
-        If lstUsers.SelectedIndex <> -1 Then
-            If File.Exists(mainPath + "\Logs.txt") Then
-                Dim objLogReader As New StreamReader(mainPath + "\Logs.txt")
-                Try
-                    MsgBox(objLogReader.ReadToEnd().ToString(), MsgBoxStyle.Information, "LOG(" + currentMonday.ToLongDateString + ") | " + lstUsers.SelectedItem.ToString)
-                    objLogReader.Close()
-                Catch ex As Exception
-                    MsgBox("No log for " + lstUsers.SelectedItem.ToString + " exists.", MsgBoxStyle.Exclamation, "Error.")
-                End Try
-            End If
-        End If
-    End Sub
+    'Private Sub btnViewLog_Click(sender As Object, e As EventArgs) Handles btnViewLog.Click
+    '    If lstUsers.SelectedIndex <> -1 Then
+    '        If File.Exists(mainPath + "\Logs.txt") Then
+    '            Dim objLogReader As New StreamReader(mainPath + "\Logs.txt")
+    '            Try
+    '                MsgBox(objLogReader.ReadToEnd().ToString(), MsgBoxStyle.Information, "LOG(" + currentMonday.ToLongDateString + ") | " + lstUsers.SelectedItem.ToString)
+    '                objLogReader.Close()
+    '            Catch ex As Exception
+    '                MsgBox("No log for " + lstUsers.SelectedItem.ToString + " exists.", MsgBoxStyle.Exclamation, "Error.")
+    '            End Try
+    '        End If
+    '    End If
+    'End Sub
 
     Private Sub lstGoalM_Leave(sender As Object, e As EventArgs) Handles lstGoalM.Leave
         lstGoalM.SelectedIndex = -1
@@ -114,9 +145,11 @@ Public Class frmAdmin
         Dim blnCancel As Boolean
         Do
             If comment <> "" Then
-                Dim objCommentWriter As New IO.StreamWriter("P:\Weekly Logs\" + lstUsers.SelectedItem.ToString + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\" + Now.ToLongDateString() + " " + "Comments.txt")
-                objCommentWriter.Write(comment)
-                objCommentWriter.Close()
+                'Dim objCommentWriter As New IO.StreamWriter("P:\Weekly Logs\" + lstUsers.SelectedItem.ToString + "\" + frmLoggingSuite.currentMonday.ToLongDateString() + "\" + Now.ToLongDateString() + " " + "Comments.txt")
+                'objCommentWriter.Write(comment)
+                'objCommentWriter.Close()
+                Dim objInsertCmd As New OleDbCommand("INSERT INTO Comments (_UName, _Date, _Entry, _Read) VALUES ('" + lstUsers.SelectedItem.ToString + "', '" + Now.ToShortDateString + "', '" + comment + "', '0')", con)
+                objInsertCmd.ExecuteNonQuery()
                 blnCancel = True
                 btnComments.Enabled = True
             Else
@@ -136,8 +169,17 @@ Public Class frmAdmin
     End Sub
 
     Private Sub btnComments_Click(sender As Object, e As EventArgs) Handles btnComments.Click
-        Dim sr As New IO.StreamReader(mainPath + "\" + Now.ToLongDateString + " Comments.txt")
-        MsgBox(sr.ReadToEnd, MsgBoxStyle.Information, "Viewing Comments.")
-        sr.Close()
+        Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_Read] LIKE '0'", con)
+        Dim commentTable As New DataTable
+        commentAdapter.Fill(commentTable)
+        Dim strComments As New List(Of Object)
+        For i = 0 To commentTable.Rows.Count - 1 ' Row loop
+            strComments.Add(commentTable.Rows(i).Item(2).ToString + " - " + commentTable.Rows(i).Item(3).ToString)
+        Next
+        Dim displayString As String
+        For Each element In strComments
+            displayString += element.ToString + Environment.NewLine
+        Next
+        MsgBox("COMMENTS:" + Environment.NewLine + Environment.NewLine + displayString)
     End Sub
 End Class

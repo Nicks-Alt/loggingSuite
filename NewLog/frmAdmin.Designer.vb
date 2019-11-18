@@ -75,7 +75,6 @@ Partial Class frmAdmin
         Me.lstDailyObjectives.BackColor = System.Drawing.Color.Silver
         Me.lstDailyObjectives.BorderStyle = System.Windows.Forms.BorderStyle.None
         Me.lstDailyObjectives.FormattingEnabled = True
-        Me.lstDailyObjectives.Items.AddRange(New Object() {"Absent", "Absent", "Absent", "Absent", "Absent"})
         Me.lstDailyObjectives.Location = New System.Drawing.Point(6, 36)
         Me.lstDailyObjectives.Margin = New System.Windows.Forms.Padding(0)
         Me.lstDailyObjectives.Name = "lstDailyObjectives"
