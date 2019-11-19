@@ -72,16 +72,15 @@ Public Class frmLoggingSuite
         End If
     End Sub
     Private Sub frmLoggingSuite_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        con.Open()
+        Try
+            con.Open()
+        Catch ex As Exception
+            Timer1.Stop()
+            MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
         LoadInformation()
         Threading.Thread.Sleep(5000)
-        'If IO.Directory.Exists("P:") = False Then
-        '    Shell("NET USE P: \\wcispdata\Public")
-        '    If IO.Directory.Exists("P:") = False Then
-        '        MsgBox("Error establishing a connection to the server. Please try again later.", MsgBoxStyle.Critical, "ERROR")
-        '        ForceClose()
-        '    End If
-        'End If
         Text += " (" + Environment.UserName + ")"
         DateTimePicker1.Value = New Date(Today.Ticks)
 

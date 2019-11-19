@@ -53,47 +53,22 @@ Public Class frmAdmin
             If goalTable.Rows(0).Item(2).ToString <> "" Then
                 lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
             End If
-            'btnViewLog.Enabled = True
-            'currentUser = lstUsers.SelectedItem.ToString
-            'mainPath = "P:" + "\Weekly Logs\" + currentUser + "\" + currentMonday.ToLongDateString
-            'If File.Exists(mainPath + "\Objectives.txt") Then
-            '    Dim objReader As New StreamReader(mainPath + "\Objectives.txt")
-            '    Try
-            '        lstDailyObjectives.Items.Clear()
-            '        Dim rawObj As String = objReader.ReadToEnd
-            '        lstDailyObjectives.Items.AddRange(rawObj.Split(Char.Parse("π")))
-            '        objReader.Close()
-            '    Catch ex As Exception
-            '        lstDailyObjectives.Items.Clear()
-            '        objReader.Close()
-            '    End Try
-            'Else
-            '    lstDailyObjectives.Items.Clear()
-            'End If
-            'If File.Exists(mainPath + "\Goal.txt") Then
-            '    Dim goalReader As New StreamReader(mainPath + "\Goal.txt")
-            '    Try
-            '        lstGoalM.Items.Clear()
-            '        Dim rawGoal As String = goalReader.ReadLine
-            '        lstGoalM.Items.Add(rawGoal)
-            '        goalReader.Close()
-            '    Catch ex As Exception
-            '        lstGoalM.Items.Clear()
-            '        goalReader.Close()
-            '    End Try
-            'Else
-            '    lstGoalM.Items.Clear()
-            'End If
-            'If File.Exists(mainPath + "\" + Now.ToLongDateString + " Comments.txt") Then
-            '    btnComments.Enabled = True
-            'Else
-            '    btnComments.Enabled = False
-            'End If
-            'If File.Exists(mainPath + "\Logs.txt") Then
-            '    btnViewLog.Enabled = True
-            'Else
-            '    btnViewLog.Enabled = False
-            'End If
+            Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_Read] LIKE '0'", con)
+            Dim commentTable As New DataTable
+            commentAdapter.Fill(commentTable)
+            If commentTable.Rows.Count <> 0 Then
+                btnComments.Enabled = True
+            Else
+                btnComments.Enabled = False
+            End If
+            Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_Monday] LIKE '" + DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday)).ToShortDateString + "'", con)
+            Dim logTable As New DataTable
+            logAdapter.Fill(logTable)
+            If logTable.Rows.Count <> 0 Then
+                btnViewLog.Enabled = True
+            Else
+                btnViewLog.Enabled = False
+            End If
         Else
             lstDailyObjectives.Items.Clear()
             lstGoalM.Items.Clear()
@@ -180,6 +155,33 @@ Public Class frmAdmin
         For Each element In strComments
             displayString += element.ToString + Environment.NewLine
         Next
-        MsgBox("COMMENTS:" + Environment.NewLine + Environment.NewLine + displayString)
+        MsgBox("COMMENTS:" + Environment.NewLine + Environment.NewLine + displayString, MsgBoxStyle.Information, "COMMENTS FOR " + lstUsers.SelectedItem.ToString.ToUpper)
+    End Sub
+
+    Private Sub btnViewLog_Click(sender As Object, e As EventArgs) Handles btnViewLog.Click
+        'If lstUsers.SelectedIndex <> -1 Then
+        '    Dim strLogs As String
+        '    Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
+        '    Dim logTable As New DataTable
+        '    logAdapter.Fill(logTable)       'Zero Based v
+        '    currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
+        '    Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_MondayDate] LIKE '" + currentMonday.AddDays(7).ToShortDateString + "'", con)
+        '    Dim goalTable As New DataTable
+        '    goalAdapter.Fill(goalTable)
+        '    strLogs = currentMonday.ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Monday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(1).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Tuesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(2).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Wednesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(3).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Thursday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(4).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Friday - 1)).ToString
+        '    If goalTable.Rows.Count <> 0 Then
+        '        strLogs += Environment.NewLine + Environment.NewLine + "GOAL FOR NEXT WEEK: " + goalTable.Rows(0).Item(2).ToString
+        '    End If
+        '    MsgBox(strLogs, vbInformation, "LOGS(" + currentMonday.ToLongDateString + ") | " + lstUsers.SelectedItem.ToString.ToUpper)
+        '    currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
+        'End If
+        Dim strLogs As String
+        Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
+        Dim logTable As New DataTable
+        logAdapter.Fill(logTable)       'Zero Based v
+        currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
+        strLogs = currentMonday.ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Monday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(1).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Tuesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(2).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Wednesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(3).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Thursday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(4).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Friday - 1)).ToString
+        MsgBox(strLogs, vbInformation, "LOGS(" + currentMonday.ToLongDateString + ") | " + lstUsers.SelectedItem.ToString.ToUpper)
+        currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     End Sub
 End Class

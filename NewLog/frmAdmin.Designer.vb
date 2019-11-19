@@ -121,6 +121,7 @@ Partial Class frmAdmin
         '
         'btnViewLog
         '
+        Me.btnViewLog.Enabled = False
         Me.btnViewLog.FlatAppearance.BorderSize = 0
         Me.btnViewLog.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer))
         Me.btnViewLog.FlatStyle = System.Windows.Forms.FlatStyle.Flat

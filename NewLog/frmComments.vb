@@ -14,6 +14,7 @@ Public Class frmComments
             MsgBox(commentTable.Rows(lstComments.SelectedIndex).Item(3).ToString, MsgBoxStyle.Information, "Comment #" + (lstComments.SelectedIndex + 1).ToString)
             commentTable.Rows.Clear()
             lstComments.Items.RemoveAt(lstComments.SelectedIndex)
+
             frmComments_Shown(Me, New EventArgs)
         End If
     End Sub
@@ -26,6 +27,8 @@ Public Class frmComments
         For i = 0 To commentTable.Rows.Count - 1 ' Row loop
             strComments.Add("Comment #" + (i + 1).ToString + ": " + Date.Parse(commentTable.Rows(i).Item(2).ToString).ToShortDateString)
         Next
-        lstComments.Items.AddRange(strComments.ToArray())
+        If lstComments.Items.Count = 0 Then
+            lstComments.Items.AddRange(strComments.ToArray())
+        End If
     End Sub
 End Class
