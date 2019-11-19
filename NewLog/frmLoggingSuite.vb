@@ -13,7 +13,7 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source='Database.mdb';Jet OLEDB:Database Password='Epsilon'")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source='P:\Weekly Logs\Database.mdb';Jet OLEDB:Database Password=#REDACTED#")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     'Friend commentFileNames As New List(Of FileInfo)
@@ -233,9 +233,9 @@ Public Class frmLoggingSuite
             If txtInput.Text.Contains(".") = False Then
                 txtInput.Text += "."
             End If
-            Dim logUpdateCmd As New OleDbCommand("UPDATE Logs SET [" + DateTimePicker1.Value.DayOfWeek.ToString + "Log] = '" + txtInput.Text + "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
+            Dim logUpdateCmd As New OleDbCommand("UPDATE Logs SET " + DateTimePicker1.Value.DayOfWeek.ToString + "Log = """ + txtInput.Text.Trim(CChar("""")) + """ WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
             logUpdateCmd.ExecuteNonQuery()
-
+            MsgBox("Success! Log has been entered:" + Environment.NewLine + Environment.NewLine + DateTimePicker1.Value.ToLongDateString + ": " + txtInput.Text, MsgBoxStyle.Information, "Success!")
             txtInput.Clear()
             If Today.DayOfWeek = DayOfWeek.Friday Then
                 Dim strGoalEntry As String
