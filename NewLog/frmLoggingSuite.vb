@@ -13,7 +13,7 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source='P:\Weekly Logs\Database.mdb';Jet OLEDB:Database Password=#REDACTED#")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='Epsilon'")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     'Friend commentFileNames As New List(Of FileInfo)
@@ -73,7 +73,9 @@ Public Class frmLoggingSuite
     End Sub
     Private Sub frmLoggingSuite_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
-            con.Open()
+            If con.State <> ConnectionState.Open Then
+                con.Open()
+            End If
         Catch ex As Exception
             Timer1.Stop()
             MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
@@ -170,8 +172,12 @@ Public Class frmLoggingSuite
         DateTimePicker1.MaxDate = New Date(Now.Ticks)
         DateTimePicker1.MinDate = New Date(Now.Ticks - 6048000000000) ' 6048000000000 = 1 week in ticks
         'Check4Comments()
+        con.Close()
     End Sub
-    Private Sub Check4Comments()
+    Private Sub Check4Comments(sender As Object, e As EventArgs) Handles MyBase.Activated
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         Dim commentTable As New DataTable
         Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Read] LIKE '0'", con)
         commentAdapter.Fill(commentTable)
@@ -180,6 +186,7 @@ Public Class frmLoggingSuite
         Else
             commentWarning.Visible = False
         End If
+        con.Close()
     End Sub
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         lblClock.Text = Now.ToLongTimeString
@@ -193,9 +200,12 @@ Public Class frmLoggingSuite
             btnAbortShutdown.Visible = True
             Me.Activate()
         End If
-        Check4Comments()
+        Check4Comments(Me, New EventArgs)
     End Sub
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         Dim strLogs As String
         Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
         Dim logTable As New DataTable
@@ -209,8 +219,12 @@ Public Class frmLoggingSuite
         Clipboard.SetText("------------------- AUTOMATICALLY GENERATED LOG -------------------" & Environment.NewLine & strLogs & Environment.NewLine & Environment.NewLine & "GOAL FOR NEXT WEEK: " & strGoal & Environment.NewLine & "GENERATED ON: " & Now.ToShortDateString)
         MsgBox("Log Copied to Clipboard", vbInformation, "Text Copied")
         txtInput.Clear()
+        con.Close()
     End Sub
     Private Sub btnRead_Click(sender As Object, e As EventArgs) Handles btnRead.Click
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         Dim strLogs As String
         Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
         Dim logTable As New DataTable
@@ -225,8 +239,12 @@ Public Class frmLoggingSuite
         End If
         MsgBox(strLogs, vbInformation, "Logs(" + currentMonday.ToLongDateString + ")")
         currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
+        con.Close()
     End Sub
     Private Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         If txtInput.Text.Length > 1 Then
             'Dim objWriter As New IO.StreamWriter(logFolderName & "\Logs.txt", True)
             txtInput_Leave(Me, New EventArgs)
@@ -254,6 +272,7 @@ Public Class frmLoggingSuite
                 End If
             End If
         End If
+        con.Close()
     End Sub
     Private Sub btnClear_Click(sender As Object, e As EventArgs)
         Select Case MsgBox("Are you sure you want to clear the file?", MsgBoxStyle.YesNo, "Are you sure?")
@@ -305,6 +324,9 @@ Public Class frmLoggingSuite
         End If
     End Sub
     Private Sub DateTimePicker1_ValueChanged(sender As Object, e As EventArgs) Handles DateTimePicker1.ValueChanged
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
         Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
         Dim logTable As New DataTable
@@ -313,6 +335,7 @@ Public Class frmLoggingSuite
             Dim logInsertCmd As New OleDbCommand("INSERT INTO Logs (_UName, _Monday) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con)
             logInsertCmd.ExecuteNonQuery()
         End If
+        con.Close()
     End Sub
     'Private Sub updatecheck()
     '    Try
@@ -401,18 +424,9 @@ Public Class frmLoggingSuite
         End If
     End Sub
     Private Sub SaveObjectives()
-        'logFolderName = "P:\Weekly Logs\" + Environment.UserName + "\" + (Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))).ToLongDateString()
-        'Dim objWriter As New IO.StreamWriter(logFolderName & "\Objectives.txt", False)
-        'Dim i As Integer
-        'For Each item In lstDailyObjectives.Items
-        '    If i < lstDailyObjectives.Items.Count - 1 Then
-        '        objWriter.Write(item.ToString() + "π")
-        '    Else
-        '        objWriter.Write(item.ToString())
-        '    End If
-        '    i += 1
-        'Next
-        'objWriter.Close()
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         Try
             Dim objectiveCmd As New OleDbCommand
             objectiveCmd.Connection = con
@@ -433,16 +447,15 @@ Public Class frmLoggingSuite
             MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
             ForceClose()
         End Try
+        con.Close()
     End Sub
     Private Sub SaveGoal()
-        'logFolderName = "P:\Weekly Logs\" + Environment.UserName + "\" + (Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))).ToLongDateString()
-        'Dim goalWriter As New IO.StreamWriter(logFolderName & "\Goal.txt", False)
-        'If lstGoalM.Items.Count <> 0 Then
-        '    goalWriter.Write(lstGoalM.Items(lstGoalM.Items.Count - 1))
-        'End If
-        'goalWriter.Close()
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         Dim goalCmd As New OleDbCommand("UPDATE Goal SET [_Entry] = '" + lstGoalM.Items.Item(0).ToString + "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
         goalCmd.ExecuteNonQuery()
+        con.Close()
     End Sub
     Private Sub frmLoggingSuite_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         lblClock.Text = Now.ToShortTimeString
