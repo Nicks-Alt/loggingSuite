@@ -7,6 +7,9 @@ Public Class frmComments
         Hide()
     End Sub
     Private Sub lstComments_DoubleClick(sender As Object, e As EventArgs) Handles lstComments.DoubleClick
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         If lstComments.SelectedIndex <> -1 Then
             Dim updateCmd As New OleDbCommand("UPDATE Comments SET [_Read] = '1' WHERE [_CommentID] LIKE '" + commentTable.Rows(lstComments.SelectedIndex).Item(0).ToString + "'", con)
             updateCmd.ExecuteNonQuery()
@@ -17,9 +20,13 @@ Public Class frmComments
 
             frmComments_Shown(Me, New EventArgs)
         End If
+        con.Close()
     End Sub
 
     Private Sub frmComments_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
         Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Read] LIKE '0'", con)
 
         commentAdapter.Fill(commentTable)
@@ -30,5 +37,6 @@ Public Class frmComments
         If lstComments.Items.Count = 0 Then
             lstComments.Items.AddRange(strComments.ToArray())
         End If
+        con.Close()
     End Sub
 End Class

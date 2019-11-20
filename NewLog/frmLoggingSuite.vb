@@ -13,7 +13,7 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='Epsilon'")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='#REDACTED#'")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     'Friend commentFileNames As New List(Of FileInfo)
@@ -200,7 +200,7 @@ Public Class frmLoggingSuite
             btnAbortShutdown.Visible = True
             Me.Activate()
         End If
-        Check4Comments(Me, New EventArgs)
+        'Check4Comments(Me, New EventArgs)
     End Sub
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
         If con.State <> ConnectionState.Open Then
