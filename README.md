@@ -6,7 +6,7 @@
 2. Run the program. If the program asks you for your goal in a little dialog input box, then it has ran successfully, if not, make an issue report on the github repository [here](https://github.com/nicksuperiorservers/loggingSuite/issues/new).
 
 ## *General Information:*
-- Everyday the program will launch when the computer starts.
+- Everyday the program will launch when the computer starts. It also creates a Desktop shortcut.
 ## *Daily Objectives:*
 - Whenever the program starts, it will ask for your objective for the day if you have not already entered it for the day.
 - After entering your objective, it will add it to a listbox on the main form.
