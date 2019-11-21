@@ -26,6 +26,15 @@ Public Class frmLoggingSuite
         Size = New Size(Size.Width, 254)
         NormalSize = New Size(Size.Width, Size.Height)
         lstDailyObjectives.Items.Clear()
+        Try
+            If con.State <> ConnectionState.Open Then
+                con.Open()
+            End If
+        Catch ex As Exception
+            Timer1.Stop()
+            MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
         Dim usernameAdapter As New OleDbDataAdapter("SELECT * FROM Users WHERE [_Name] LIKE '" + Environment.UserName + "'", con)
         Dim usernameTable As New DataTable
         usernameAdapter.Fill(usernameTable)
@@ -70,17 +79,9 @@ Public Class frmLoggingSuite
         If goalTable.Rows(0).Item(2).ToString <> "" Then
             lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
         End If
+        con.Close()
     End Sub
     Private Sub frmLoggingSuite_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Try
-            If con.State <> ConnectionState.Open Then
-                con.Open()
-            End If
-        Catch ex As Exception
-            Timer1.Stop()
-            MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
-            ForceClose()
-        End Try
         LoadInformation()
         Threading.Thread.Sleep(5000)
         Text += " (" + Environment.UserName + ")"
@@ -212,14 +213,18 @@ Public Class frmLoggingSuite
         logAdapter.Fill(logTable)       'Zero Based v
         currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
         strLogs = currentMonday.ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Monday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(1).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Tuesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(2).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Wednesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(3).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Thursday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(4).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Friday - 1)).ToString
-        Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday)).ToShortDateString + "'", con)
+        Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday)).AddDays(7).ToShortDateString + "'", con)
         Dim goalTable As New DataTable
         goalAdapter.Fill(goalTable)
-        Dim strGoal As String = goalTable.Rows(0).Item(2).ToString
-        Clipboard.SetText("------------------- AUTOMATICALLY GENERATED LOG -------------------" & Environment.NewLine & strLogs & Environment.NewLine & Environment.NewLine & "GOAL FOR NEXT WEEK: " & strGoal & Environment.NewLine & "GENERATED ON: " & Now.ToShortDateString)
-        MsgBox("Log Copied to Clipboard", vbInformation, "Text Copied")
-        txtInput.Clear()
         con.Close()
+        If goalTable.Rows.Count <> 0 Then
+            Dim strGoal As String = goalTable.Rows(0).Item(2).ToString
+            Clipboard.SetText("------------------- AUTOMATICALLY GENERATED LOG -------------------" & Environment.NewLine & strLogs & Environment.NewLine & Environment.NewLine & "GOAL FOR NEXT WEEK: " & strGoal & Environment.NewLine & "GENERATED ON: " & Now.ToShortDateString)
+        Else
+            Clipboard.SetText("------------------- AUTOMATICALLY GENERATED LOG -------------------" & Environment.NewLine & strLogs & Environment.NewLine & Environment.NewLine & "GENERATED ON: " & Now.ToShortDateString)
+        End If
+        MsgBox("Log Copied to Clipboard", vbInformation, "Text Copied")
+            txtInput.Clear()
     End Sub
     Private Sub btnRead_Click(sender As Object, e As EventArgs) Handles btnRead.Click
         If con.State <> ConnectionState.Open Then
@@ -233,13 +238,14 @@ Public Class frmLoggingSuite
         Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.AddDays(7).ToShortDateString + "'", con)
         Dim goalTable As New DataTable
         goalAdapter.Fill(goalTable)
+        con.Close()
         strLogs = currentMonday.ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Monday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(1).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Tuesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(2).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Wednesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(3).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Thursday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(4).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Friday - 1)).ToString
         If goalTable.Rows.Count <> 0 Then
             strLogs += Environment.NewLine + Environment.NewLine + "GOAL FOR NEXT WEEK: " + goalTable.Rows(0).Item(2).ToString
         End If
         MsgBox(strLogs, vbInformation, "Logs(" + currentMonday.ToLongDateString + ")")
         currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
-        con.Close()
+
     End Sub
     Private Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
         If con.State <> ConnectionState.Open Then
