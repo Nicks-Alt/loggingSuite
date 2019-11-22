@@ -1,5 +1,4 @@
 ﻿Option Strict On
-Imports System.IO
 Imports IWshRuntimeLibrary
 Imports Microsoft.Office.Interop
 Imports System.Data.OleDb
@@ -16,70 +15,73 @@ Public Class frmLoggingSuite
     Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='#REDACTED#'")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
+    Private seenComment As Boolean
     'Friend commentFileNames As New List(Of FileInfo)
     'TODO: https://github.com/nicksuperiorservers/loggingSuite/issues
     Private Sub LoadInformation()
-        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\loggingSuite.exe") Then
-            IO.File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\loggingSuite.exe")
+        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "loggingSuite.lnk") = False Then
+            CreateDesktopShortCut()
         End If
-        CreateShortCut()
+        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "loggingSuite.lnk") = False Then
+            CreateShortCut()
+        End If
         Size = New Size(Size.Width, 254)
         NormalSize = New Size(Size.Width, Size.Height)
         lstDailyObjectives.Items.Clear()
-        Try
-            If con.State <> ConnectionState.Open Then
-                con.Open()
-            End If
-        Catch ex As Exception
-            Timer1.Stop()
-            MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
-            ForceClose()
-        End Try
-        Dim usernameAdapter As New OleDbDataAdapter("SELECT * FROM Users WHERE [_Name] LIKE '" + Environment.UserName + "'", con)
-        Dim usernameTable As New DataTable
-        usernameAdapter.Fill(usernameTable)
-        If usernameTable.Rows.Count = 0 Then
-            Dim insertUserIntoTableCmd As New OleDbCommand("INSERT INTO Users (_Name) VALUES ('" + Environment.UserName + "')", con)
-            insertUserIntoTableCmd.ExecuteNonQuery()
-        End If
-
-        Dim objectiveAdapter As New OleDbDataAdapter("SELECT * FROM Objectives WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
-        Dim objectiveTable As New DataTable
-        objectiveAdapter.Fill(objectiveTable)
-        If objectiveTable.Rows.Count = 0 Then
-            Dim objectiveInsert As New OleDbCommand("INSERT INTO Objectives (_UName, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con)
-            objectiveInsert.ExecuteNonQuery()
-        End If
-        objectiveTable.Rows.Clear()
-        objectiveAdapter.Fill(objectiveTable)
-        Try
-            For i = 2 To Now.DayOfWeek + 1
-                If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
-                    lstDailyObjectives.Items.Add("Absent.")
-                Else
-                    lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
+            Try
+                If con.State <> ConnectionState.Open Then
+                    con.Open()
                 End If
-            Next
-        Catch ex As Exception
+            Catch ex As Exception
+                Timer1.Stop()
+                MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
+                ForceClose()
+            End Try
+            Dim usernameAdapter As New OleDbDataAdapter("SELECT * FROM Users WHERE [_Name] LIKE '" + Environment.UserName + "'", con)
+            Dim usernameTable As New DataTable
+            usernameAdapter.Fill(usernameTable)
+            If usernameTable.Rows.Count = 0 Then
+                Dim insertUserIntoTableCmd As New OleDbCommand("INSERT INTO Users (_Name) VALUES ('" + Environment.UserName + "')", con)
+                insertUserIntoTableCmd.ExecuteNonQuery()
+            End If
 
-            MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
-            ForceClose()
-        End Try
+            Dim objectiveAdapter As New OleDbDataAdapter("SELECT * FROM Objectives WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+            Dim objectiveTable As New DataTable
+            objectiveAdapter.Fill(objectiveTable)
+            If objectiveTable.Rows.Count = 0 Then
+                Dim objectiveInsert As New OleDbCommand("INSERT INTO Objectives (_UName, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con)
+                objectiveInsert.ExecuteNonQuery()
+            End If
+            objectiveTable.Rows.Clear()
+            objectiveAdapter.Fill(objectiveTable)
+            Try
+                For i = 2 To Now.DayOfWeek + 1
+                    If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
+                        lstDailyObjectives.Items.Add("Absent.")
+                    Else
+                        lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
+                    End If
+                Next
+            Catch ex As Exception
 
-        Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con) ' Select the row if it exists
-        Dim goalTable As New DataTable
-        goalAdapter.Fill(goalTable)
-        If goalTable.Rows.Count = 0 Then
-            Dim goalInsert As New OleDbCommand("INSERT INTO Goal (_Uname, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con) ' Insert a row so its available for updating
-            goalInsert.ExecuteNonQuery()
-        End If
-        goalTable.Rows.Clear()
-        goalAdapter.SelectCommand = New OleDbCommand("SELECT [_Entry] FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
-        goalAdapter.Fill(goalTable)
-        If goalTable.Rows(0).Item(2).ToString <> "" Then
-            lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
-        End If
-        con.Close()
+                MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
+                ForceClose()
+            End Try
+
+            Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con) ' Select the row if it exists
+            Dim goalTable As New DataTable
+            goalAdapter.Fill(goalTable)
+            If goalTable.Rows.Count = 0 Then
+                Dim goalInsert As New OleDbCommand("INSERT INTO Goal (_Uname, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con) ' Insert a row so its available for updating
+                goalInsert.ExecuteNonQuery()
+            End If
+            goalTable.Rows.Clear()
+            goalAdapter.SelectCommand = New OleDbCommand("SELECT [_Entry] FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+            goalAdapter.Fill(goalTable)
+            If goalTable.Rows(0).Item(2).ToString <> "" Then
+                lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
+            End If
+            con.Close()
     End Sub
     Private Sub frmLoggingSuite_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         LoadInformation()
@@ -184,8 +186,20 @@ Public Class frmLoggingSuite
         commentAdapter.Fill(commentTable)
         If commentTable.Rows.Count <> 0 Then
             commentWarning.Visible = True
+            If seenComment = False Then
+                Dim notifyIcon As New NotifyIcon
+
+                notifyIcon.Visible = True
+                notifyIcon.Icon = My.Resources.icon
+                notifyIcon.BalloonTipIcon = ToolTipIcon.Warning
+                notifyIcon.BalloonTipTitle = "Logging Suite"
+                notifyIcon.BalloonTipText = "You have new comments!"
+                notifyIcon.ShowBalloonTip(5000)
+                seenComment = True
+            End If
         Else
             commentWarning.Visible = False
+            seenComment = False
         End If
         con.Close()
     End Sub
@@ -248,20 +262,19 @@ Public Class frmLoggingSuite
 
     End Sub
     Private Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
-        If con.State <> ConnectionState.Open Then
-            con.Open()
-        End If
         If txtInput.Text.Length > 1 Then
-            'Dim objWriter As New IO.StreamWriter(logFolderName & "\Logs.txt", True)
             txtInput_Leave(Me, New EventArgs)
             If txtInput.Text.Contains(".") = False Then
                 txtInput.Text += "."
+            End If
+            If con.State <> ConnectionState.Open Then
+                con.Open()
             End If
             Dim logUpdateCmd As New OleDbCommand("UPDATE Logs SET " + DateTimePicker1.Value.DayOfWeek.ToString + "Log = """ + txtInput.Text.Trim(CChar("""")) + """ WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
             logUpdateCmd.ExecuteNonQuery()
             MsgBox("Success! Log has been entered:" + Environment.NewLine + Environment.NewLine + DateTimePicker1.Value.ToLongDateString + ": " + txtInput.Text, MsgBoxStyle.Information, "Success!")
             txtInput.Clear()
-            If Today.DayOfWeek = DayOfWeek.Friday Then
+            If Today.DayOfWeek = DayOfWeek.Friday AndAlso DateTimePicker1.Value.DayOfWeek = Today.DayOfWeek Then
                 Dim strGoalEntry As String
                 Do
                     strGoalEntry = InputBox("Think about a potential goal for next week.", "Goal Entry", " ")
@@ -269,6 +282,9 @@ Public Class frmLoggingSuite
                 Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.AddDays(7).ToShortDateString + "'", con)
                 Dim goalTable As New DataTable
                 goalAdapter.Fill(goalTable)
+                If con.State <> ConnectionState.Open Then
+                    con.Open()
+                End If
                 If goalTable.Rows.Count = 0 Then
                     Dim goalInsertCmd As New OleDbCommand("INSERT INTO Goal (_UName, _MondayDate, _Entry) VALUES ('" + Environment.UserName + "', '" + currentMonday.AddDays(7).ToShortDateString + "', '" + strGoalEntry + "')", con)
                     goalInsertCmd.ExecuteNonQuery()
@@ -279,6 +295,7 @@ Public Class frmLoggingSuite
             End If
         End If
         con.Close()
+        Timer1.Start()
     End Sub
     Private Sub btnClear_Click(sender As Object, e As EventArgs)
         Select Case MsgBox("Are you sure you want to clear the file?", MsgBoxStyle.YesNo, "Are you sure?")
@@ -533,7 +550,25 @@ Public Class frmLoggingSuite
         Dim startupPath As String = Environment.GetFolderPath(Environment.SpecialFolder.Startup)
         Dim WshShell As New WshShell
         ' short cut files have a .lnk extension
-        Dim shortCut As IWshShortcut = DirectCast(WshShell.CreateShortcut(startupPath & "\loggingSuite-shortcut.lnk"), IWshShortcut)
+        Dim shortCut As IWshShortcut = DirectCast(WshShell.CreateShortcut(startupPath & "\loggingSuite.lnk"), IWshShortcut)
+
+        ' set the shortcut properties
+        With shortCut
+            .TargetPath = Application.ExecutablePath
+            .WindowStyle = 1I
+            .Description = "Shortcut for logging suite"
+            .WorkingDirectory = Application.StartupPath
+            ' the next line gets the first Icon from the executing program
+            .IconLocation = Application.ExecutablePath + ",0"
+            .Arguments = String.Empty
+            .Save() ' save the shortcut file
+        End With
+    End Sub
+    Private Sub CreateDesktopShortCut()
+        Dim startupPath As String = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
+        Dim WshShell As New WshShell
+        ' short cut files have a .lnk extension
+        Dim shortCut As IWshShortcut = DirectCast(WshShell.CreateShortcut(startupPath & "\loggingSuite.lnk"), IWshShortcut)
 
         ' set the shortcut properties
         With shortCut

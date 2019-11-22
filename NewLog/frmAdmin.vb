@@ -90,7 +90,9 @@ Public Class frmAdmin
     End Sub
 
     Private Sub lstDailyObjectives_DoubleClick(sender As Object, e As EventArgs) Handles lstDailyObjectives.DoubleClick
-        MsgBox(lstDailyObjectives.SelectedItem.ToString, MsgBoxStyle.Information, "Information")
+        If lstDailyObjectives.SelectedIndex <> -1 Then
+            MsgBox(lstDailyObjectives.SelectedItem.ToString, MsgBoxStyle.Information, "Information")
+        End If
     End Sub
 
     Private Sub frmAdmin_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
