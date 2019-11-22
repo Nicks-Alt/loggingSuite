@@ -400,7 +400,7 @@ Public Class frmLoggingSuite
         lblShutdownTimer.Text = "00:" & fixedMinutes & ":" & fixedSeconds
         Focus()
     End Sub
-    Private Sub seanIsAnAbuser(sender As Object, e As EventArgs) Handles MyBase.Closed
+    Private Sub seanIsAnAbuser()
         Shell("shutdown -a")
         Timer1.Stop()
         Timer2.Stop()
@@ -492,6 +492,7 @@ Public Class frmLoggingSuite
             Me.Visible = False
             e.Cancel = True
         Else
+            seanIsAnAbuser()
             ForceClose()
         End If
     End Sub
