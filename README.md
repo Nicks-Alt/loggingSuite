@@ -15,7 +15,9 @@
 - After entering your goal, it will be available to be viewed on the main form in a listbox named "Goal Management".
 ## *Reminder Time:*
 - By clicking on the time that is underlined on the main form, it will show a SetTimeDialog so you can set the time the shutdown sequence will start.
-## *Shutdown Sequence/Reminder to do logs*
+## *Shutdown Sequence/Reminder to do logs:*
 - Whenever the time set by the user on the main form is equal to the machine's time, it will begin a *15 minute* shutdown sequence.
 - The amount of minutes and seconds will be shown to the user on the main form until they press the *ABORT SHUTDOWN* button.
 - More info will be provided here as time progresses.
+## *Other Features:*
+<img src = https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png></img>
