@@ -12,7 +12,7 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='#REDACTED'")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='Epsilon'")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     Private seenComment As Boolean
@@ -225,7 +225,7 @@ Public Class frmLoggingSuite
         Dim logAdapter As New OleDbDataAdapter("SELECT * FROM Logs WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Monday] LIKE '" + currentMonday.ToShortDateString + "'", con)
         Dim logTable As New DataTable
         logAdapter.Fill(logTable)       'Zero Based v
-        currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
+        currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
         strLogs = currentMonday.ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Monday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(1).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Tuesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(2).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Wednesday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(3).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Thursday - 1)).ToString + Environment.NewLine + currentMonday.AddDays(4).ToLongDateString + ": " + logTable.Rows(0).Item(2 + (DayOfWeek.Friday - 1)).ToString
         Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday)).AddDays(7).ToShortDateString + "'", con)
         Dim goalTable As New DataTable
@@ -238,7 +238,7 @@ Public Class frmLoggingSuite
             Clipboard.SetText("------------------- AUTOMATICALLY GENERATED LOG -------------------" & Environment.NewLine & strLogs & Environment.NewLine & Environment.NewLine & "GENERATED ON: " & Now.ToShortDateString)
         End If
         MsgBox("Log Copied to Clipboard", vbInformation, "Text Copied")
-            txtInput.Clear()
+        txtInput.Clear()
     End Sub
     Private Sub btnRead_Click(sender As Object, e As EventArgs) Handles btnRead.Click
         If con.State <> ConnectionState.Open Then
@@ -258,8 +258,6 @@ Public Class frmLoggingSuite
             strLogs += Environment.NewLine + Environment.NewLine + "GOAL FOR NEXT WEEK: " + goalTable.Rows(0).Item(2).ToString
         End If
         MsgBox(strLogs, vbInformation, "Logs(" + currentMonday.ToLongDateString + ")")
-        currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
-
     End Sub
     Private Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
         If txtInput.Text.Length > 1 Then
@@ -347,6 +345,9 @@ Public Class frmLoggingSuite
         End If
     End Sub
     Private Sub DateTimePicker1_ValueChanged(sender As Object, e As EventArgs) Handles DateTimePicker1.ValueChanged
+        If DateTimePicker1.Value.DayOfWeek = DayOfWeek.Saturday Or DateTimePicker1.Value.DayOfWeek = DayOfWeek.Sunday Then
+            DateTimePicker1.Value = New Date(Now.Year, Now.Month, Now.Day)
+        End If
         If con.State <> ConnectionState.Open Then
             con.Open()
         End If
@@ -499,6 +500,7 @@ Public Class frmLoggingSuite
 
     Private Sub txtInput_KeyDown_1(sender As Object, e As KeyEventArgs) Handles txtInput.KeyDown
         If e.KeyCode = Keys.Enter Then
+            txtInput.Text.Trim(CType(vbCrLf, Char()))
             btnSubmit_Click(Me, New EventArgs)
         End If
     End Sub
