@@ -1,6 +1,6 @@
 ﻿Public Class frmAdminLogin
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
-        If TextBox1.Text = "Epsilon" Then
+        If TextBox1.Text = "#REDACTED#" Then
             frmAdmin.Show()
             frmLoggingSuite.Hide()
             Me.Hide()

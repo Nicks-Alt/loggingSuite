@@ -12,7 +12,7 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\Database.mdb;Jet OLEDB:Database Password='Epsilon'")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='#REDACTED'")
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     Private seenComment As Boolean
@@ -41,8 +41,8 @@ Public Class frmLoggingSuite
             Dim usernameTable As New DataTable
             usernameAdapter.Fill(usernameTable)
             If usernameTable.Rows.Count = 0 Then
-                Dim insertUserIntoTableCmd As New OleDbCommand("INSERT INTO Users (_Name) VALUES ('" + Environment.UserName + "')", con)
-                insertUserIntoTableCmd.ExecuteNonQuery()
+            Dim insertUserIntoTableCmd As New OleDbCommand("INSERT INTO Users (_Name) VALUES ('" + Environment.UserName + "')", con)
+            insertUserIntoTableCmd.ExecuteNonQuery()
             End If
 
             Dim objectiveAdapter As New OleDbDataAdapter("SELECT * FROM Objectives WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
@@ -468,7 +468,7 @@ Public Class frmLoggingSuite
             objectiveCmd.CommandText += "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'"
             objectiveCmd.ExecuteNonQuery()
         Catch ex As Exception
-            MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
+            MsgBox("Error when saving objectives to the database. Make sure it is not readonly." + Environment.NewLine + Environment.NewLine + "Exception Text:" + Environment.NewLine + ex.Message, MsgBoxStyle.Critical, "ERROR")
             ForceClose()
         End Try
         con.Close()
