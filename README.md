@@ -19,5 +19,13 @@
 - Whenever the time set by the user on the main form is equal to the machine's time, it will begin a *15 minute* shutdown sequence.
 - The amount of minutes and seconds will be shown to the user on the main form until they press the *ABORT SHUTDOWN* button.
 - More info will be provided here as time progresses.
+## *The Logging Suite & Avast Anti-Virus*
+- Since avast is a very sensitive Anti-Virus, it will sometimes quarentine the .exe as a false positive. In order to add an exception for Avast, do the following:
+  1) Expand the Windows Task Bar context menu to locate the avast icon and right click. Select the <b>Virus Chest</b> option.
+  <img src=https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/avast1.png>
+  2) In the virus chest menu, click on the 3 dots next to the application you wish to restore.
+  <img src=https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast2.png>
+  3) Click <b>Restore & Add Exception<b>.
+  <img src=https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast3.png>
 ## *Other Features:*
-<img src = https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png></img>
+<img src = https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png>
