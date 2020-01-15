@@ -12,171 +12,202 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='#REDACTED'")
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='#REDACTED'") ' replace #REDACTED with db password provided in logging suite admin documentation
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     Private seenComment As Boolean
+    Friend blnIsAdmin As Boolean = False
     'Friend commentFileNames As New List(Of FileInfo)
     'TODO: https://github.com/nicksuperiorservers/loggingSuite/issues
+    ''' <summary>
+    ''' Loads the logging information for the currently logged on user. Fills the Objectives/Goal panels on startup.
+    ''' </summary>
     Private Sub LoadInformation()
         If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "loggingSuite.lnk") = False Then
-            CreateDesktopShortCut()
+            CreateDesktopShortCut() ' Creates desktop shortcut
         End If
         If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "loggingSuite.lnk") = False Then
-            CreateShortCut()
+            CreateShortCut() ' Creates startup shortcut
         End If
         Size = New Size(Size.Width, 254)
-        NormalSize = New Size(Size.Width, Size.Height)
+        NormalSize = New Size(Size.Width, Size.Height) ' Make sure the form is normal size to hide the abort shutdown button
         lstDailyObjectives.Items.Clear()
-            Try
-                If con.State <> ConnectionState.Open Then
-                    con.Open()
-                End If
-            Catch ex As Exception
-                Timer1.Stop()
-                MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
-                ForceClose()
-            End Try
-            Dim usernameAdapter As New OleDbDataAdapter("SELECT * FROM Users WHERE [_Name] LIKE '" + Environment.UserName + "'", con)
-            Dim usernameTable As New DataTable
-            usernameAdapter.Fill(usernameTable)
-            If usernameTable.Rows.Count = 0 Then
+        Try
+            If con.State <> ConnectionState.Open Then
+                con.Open()
+            End If
+        Catch ex As Exception
+            Timer1.Stop()
+            MsgBox("Error connecting to the server, please try again later.", MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
+        Dim usernameAdapter As New OleDbDataAdapter("SELECT * FROM Users WHERE [_Name] LIKE '" + Environment.UserName + "'", con)
+        Dim usernameTable As New DataTable
+        usernameAdapter.Fill(usernameTable)
+        If usernameTable.Rows.Count = 0 Then
             Dim insertUserIntoTableCmd As New OleDbCommand("INSERT INTO Users (_Name) VALUES ('" + Environment.UserName + "')", con)
             insertUserIntoTableCmd.ExecuteNonQuery()
-            End If
+        End If
 
-            Dim objectiveAdapter As New OleDbDataAdapter("SELECT * FROM Objectives WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
-            Dim objectiveTable As New DataTable
-            objectiveAdapter.Fill(objectiveTable)
-            If objectiveTable.Rows.Count = 0 Then
-                Dim objectiveInsert As New OleDbCommand("INSERT INTO Objectives (_UName, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con)
-                objectiveInsert.ExecuteNonQuery()
-            End If
-            objectiveTable.Rows.Clear()
-            objectiveAdapter.Fill(objectiveTable)
-            Try
-                For i = 2 To Now.DayOfWeek + 1
-                    If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
-                        lstDailyObjectives.Items.Add("Absent.")
-                    Else
-                        lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
-                    End If
-                Next
-            Catch ex As Exception
-
-                MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
-                ForceClose()
-            End Try
-
-            Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con) ' Select the row if it exists
-            Dim goalTable As New DataTable
-            goalAdapter.Fill(goalTable)
-            If goalTable.Rows.Count = 0 Then
-                Dim goalInsert As New OleDbCommand("INSERT INTO Goal (_Uname, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con) ' Insert a row so its available for updating
-                goalInsert.ExecuteNonQuery()
-            End If
-            goalTable.Rows.Clear()
-            goalAdapter.SelectCommand = New OleDbCommand("SELECT [_Entry] FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
-            goalAdapter.Fill(goalTable)
-            If goalTable.Rows(0).Item(2).ToString <> "" Then
-                lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
-            End If
-            con.Close()
-    End Sub
-    Private Sub frmLoggingSuite_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        LoadInformation()
-        Threading.Thread.Sleep(5000)
-        Text += " (" + Environment.UserName + ")"
-        DateTimePicker1.Value = New Date(Today.Ticks)
-
-        If lstGoalM.Items.Count = 0 Then
-            Dim goodValue As Boolean
-            Dim weeklyGoal As String
-            Do
-                weeklyGoal = InputBox("Enter goal for this week (" & Now.ToLongDateString & ")", "Enter goal.", " ")
-                If weeklyGoal = "" Then
-                    If MsgBox("Are you sure you want to close the program?", MsgBoxStyle.YesNo, "Cancel?") = MsgBoxResult.Yes Then
-                        ForceClose()
-                    Else
-                        goodValue = False
-                    End If
+        Dim objectiveAdapter As New OleDbDataAdapter("SELECT * FROM Objectives WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+        Dim objectiveTable As New DataTable
+        objectiveAdapter.Fill(objectiveTable)
+        If objectiveTable.Rows.Count = 0 Then
+            Dim objectiveInsert As New OleDbCommand("INSERT INTO Objectives (_UName, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con)
+            objectiveInsert.ExecuteNonQuery()
+        End If
+        objectiveTable.Rows.Clear()
+        objectiveAdapter.Fill(objectiveTable)
+        Try
+            ' No objective for that day? Let's just say that they were absent.
+            For i = 2 To Now.DayOfWeek + 1
+                If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
+                    lstDailyObjectives.Items.Add("Absent.")
                 Else
-                    goodValue = True
+                    lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
                 End If
-            Loop Until goodValue
-            lstGoalM.Items.Add(weeklyGoal)
-            SaveGoal()
-        End If
-        Dim currentIndex As Integer
-        For i = 0 To lstDailyObjectives.Items.Count - 1
-            If lstDailyObjectives.Items.Item(i).ToString = "" Then
-                lstDailyObjectives.Items.RemoveAt(i)
-            End If
-        Next
-        If lstDailyObjectives.Items.Count < Now.DayOfWeek Then
-            Dim dailyObj As String
-            Dim i As Boolean
-            Do
-                dailyObj = InputBox("Enter your objective for today (" & Today.ToLongDateString & ")", "Enter objective", " ")
-                If dailyObj = "" Then
-                    If MsgBox("Are you sure you want to close the program?", MsgBoxStyle.YesNo, "Cancel?") = MsgBoxResult.Yes Then
-                        ForceClose()
-                    Else
-                        i = True
-                    End If
-                Else
-                    i = False
-                End If
-            Loop While i
-            'lstDailyObjectives.Items.AddRange({"Absent.", "Absent.", "Absent.", "Absent.", "Absent."})
-            Select Case Today.DayOfWeek
-                Case DayOfWeek.Monday
-                    lstDailyObjectives.Items.Insert(0, dailyObj)
-                    currentIndex = 1
-                Case DayOfWeek.Tuesday
+            Next
+        Catch ex As Exception
 
-                    lstDailyObjectives.Items.Insert(1, dailyObj)
-                    'lstDailyObjectives.Items.RemoveAt(2)
-                    currentIndex = 2
-                Case DayOfWeek.Wednesday
-                    lstDailyObjectives.Items.Insert(2, dailyObj)
-                    'lstDailyObjectives.Items.RemoveAt(3)
-                    currentIndex = 3
-                Case DayOfWeek.Thursday
-                    lstDailyObjectives.Items.Insert(3, dailyObj)
-                    'lstDailyObjectives.Items.RemoveAt(4)
-                    currentIndex = 4
-                Case DayOfWeek.Friday
-                    lstDailyObjectives.Items.Insert(4, dailyObj)
-                    'lstDailyObjectives.Items.RemoveAt(5)
-                    currentIndex = 5
-            End Select
-        End If
-        'For temp = lstDailyObjectives.Items.Count To Now.DayOfWeek Step -1
-        '    lstDailyObjectives.Items.RemoveAt(temp - 1)
-        'Next
-        SaveObjectives()
-        currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
-        If IO.File.Exists(reminderConfigFileName) = False Then
-            Dim objWriter As New IO.StreamWriter(reminderConfigFileName)
-            objWriter.WriteLine("10:22:00 AM")
-            objWriter.Close()
-            IO.File.SetAttributes(reminderConfigFileName, IO.FileAttributes.Hidden)
-        End If
+            MsgBox("You cannot use the logging suite on the weekends! :(", MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
 
-        Dim objReader As New IO.StreamReader(reminderConfigFileName)
-        strReminderTime = objReader.ReadLine
-        objReader.Close()
-        'If IO.Directory.Exists(logFolderName) = False Then
-        '    IO.Directory.CreateDirectory(logFolderName)
-        'End If
-        btnAbortShutdown.Visible = False
-        'updatecheck()
-        DateTimePicker1.MaxDate = New Date(Now.Ticks)
-        DateTimePicker1.MinDate = New Date(Now.Ticks - 6048000000000) ' 6048000000000 = 1 week in ticks
-        'Check4Comments()
+        Dim goalAdapter As New OleDbDataAdapter("SELECT * FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con) ' Select the row if it exists
+        Dim goalTable As New DataTable
+        goalAdapter.Fill(goalTable)
+        If goalTable.Rows.Count = 0 Then
+            Dim goalInsert As New OleDbCommand("INSERT INTO Goal (_Uname, _MondayDate) VALUES ('" + Environment.UserName + "', '" + currentMonday.ToShortDateString + "')", con) ' Insert a row so its available for updating
+            goalInsert.ExecuteNonQuery()
+        End If
+        goalTable.Rows.Clear()
+        goalAdapter.SelectCommand = New OleDbCommand("SELECT [_Entry] FROM Goal WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+        goalAdapter.Fill(goalTable)
+        If goalTable.Rows(0).Item(2).ToString <> "" Then
+            lstGoalM.Items.Add(goalTable.Rows(0).Item(2).ToString)
+        End If
         con.Close()
     End Sub
+    Private Function IsAdmin() As Boolean
+        con.Open()
+        Dim sqlCmd As New OleDbDataAdapter("SELECT [IsAdmin] FROM Users WHERE [_Name]='" + Environment.UserName + "'", con)
+        Dim tbl As New DataTable
+        sqlCmd.Fill(tbl)
+        con.Close()
+        Dim b As Boolean = Convert.ToBoolean(tbl.Rows(0).ItemArray(0))
+        If b = Nothing Then
+            Return False
+        ElseIf b = True Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+    Private Sub frmLoggingSuite_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        LoadInformation()
+        SplashScreen1.Show()
+        Threading.Thread.Sleep(5000)
+        SplashScreen1.Close()
+        Text += " (" + Environment.UserName + ")" ' cool main form text to get username for informative purposes
+        DateTimePicker1.Value = New Date(Today.Ticks)
+        blnIsAdmin = IsAdmin()
+        If blnIsAdmin = False Then
+            If lstGoalM.Items.Count = 0 Then
+                Dim goodValue As Boolean
+                Dim weeklyGoal As String
+                Do
+                    weeklyGoal = InputBox("Enter goal for this week (" & Now.ToLongDateString & ")", "Enter goal.", " ").Replace("'", "")
+                    If weeklyGoal = "" Then
+                        If MsgBox("Are you sure you want to close the program?", MsgBoxStyle.YesNo, "Cancel?") = MsgBoxResult.Yes Then
+                            ForceClose()
+                        Else
+                            goodValue = False
+                        End If
+                    Else
+                        goodValue = True
+                    End If
+                Loop Until goodValue
+                lstGoalM.Items.Add(weeklyGoal)
+                SaveGoal()
+            End If
+            Dim currentIndex As Integer
+            For i = 0 To lstDailyObjectives.Items.Count - 1
+                If lstDailyObjectives.Items.Item(i).ToString = "" Then
+                    lstDailyObjectives.Items.RemoveAt(i)
+                End If
+            Next
+            If lstDailyObjectives.Items.Count < Now.DayOfWeek Then
+                Dim dailyObj As String
+                Dim i As Boolean
+                Do
+                    dailyObj = InputBox("Enter your objective for today (" & Today.ToLongDateString & ")", "Enter objective", " ").Replace("'", "")
+                    If dailyObj = "" Then
+                        If MsgBox("Are you sure you want to close the program?", MsgBoxStyle.YesNo, "Cancel?") = MsgBoxResult.Yes Then
+                            ForceClose()
+                        Else
+                            i = True
+                        End If
+                    Else
+                        i = False
+                    End If
+                Loop While i
+                'lstDailyObjectives.Items.AddRange({"Absent.", "Absent.", "Absent.", "Absent.", "Absent."})
+                Select Case Today.DayOfWeek
+                    Case DayOfWeek.Monday
+                        lstDailyObjectives.Items.Insert(0, dailyObj)
+                        currentIndex = 1
+                    Case DayOfWeek.Tuesday
+
+                        lstDailyObjectives.Items.Insert(1, dailyObj)
+                        'lstDailyObjectives.Items.RemoveAt(2)
+                        currentIndex = 2
+                    Case DayOfWeek.Wednesday
+                        lstDailyObjectives.Items.Insert(2, dailyObj)
+                        'lstDailyObjectives.Items.RemoveAt(3)
+                        currentIndex = 3
+                    Case DayOfWeek.Thursday
+                        lstDailyObjectives.Items.Insert(3, dailyObj)
+                        'lstDailyObjectives.Items.RemoveAt(4)
+                        currentIndex = 4
+                    Case DayOfWeek.Friday
+                        lstDailyObjectives.Items.Insert(4, dailyObj)
+                        'lstDailyObjectives.Items.RemoveAt(5)
+                        currentIndex = 5
+                End Select
+            End If
+            'For temp = lstDailyObjectives.Items.Count To Now.DayOfWeek Step -1
+            '    lstDailyObjectives.Items.RemoveAt(temp - 1)
+            'Next
+            SaveObjectives()
+            currentMonday = DateTimePicker1.Value.AddDays(-(DateTimePicker1.Value.DayOfWeek - DayOfWeek.Monday))
+            If IO.File.Exists(reminderConfigFileName) = False Then
+                Dim objWriter As New IO.StreamWriter(reminderConfigFileName)
+                objWriter.WriteLine("10:22:00 AM")
+                objWriter.Close()
+                IO.File.SetAttributes(reminderConfigFileName, IO.FileAttributes.Hidden)
+            End If
+
+            Dim objReader As New IO.StreamReader(reminderConfigFileName)
+            strReminderTime = objReader.ReadLine
+            objReader.Close()
+            'If IO.Directory.Exists(logFolderName) = False Then
+            '    IO.Directory.CreateDirectory(logFolderName)
+            'End If
+            btnAbortShutdown.Visible = False
+            'updatecheck()
+            DateTimePicker1.MaxDate = New Date(Now.Ticks)
+            DateTimePicker1.MinDate = New Date(Now.Ticks - 6048000000000) ' 6048000000000 = 1 week in ticks
+            'Check4Comments()
+            con.Close()
+        Else
+            frmAdmin.ShowDialog()
+            ForceClose()
+        End If
+    End Sub
+    'Private Sub frmLoggingSuite_Loaded(sender As Object, e As EventArgs) Handles MyBase.HandleCreated
+
+    'End Sub
     Private Sub Check4Comments(sender As Object, e As EventArgs) Handles MyBase.Activated
         If con.State <> ConnectionState.Open Then
             con.Open()
@@ -644,3 +675,23 @@ Public Class frmLoggingSuite
         frmComments.ShowDialog()
     End Sub
 End Class
+'Public Class ThreadHelperClass ' Because fuck threads And Me Not allowing To just Set text On a label Like a normal person
+'    Delegate Sub SetTextCallback(f As Form, ctrl As Control, text As String)
+'    ''' <summary>
+'    ''' Set text property of various controls
+'    ''' </summary>
+'    ''' <param name="form">The calling form</param>
+'    ''' <param name="ctrl">The control being modified</param>
+'    ''' <param name="text">The text to set</param>
+'    Public Sub SetText(form As Form, ctrl As Control, text As String)
+'        '// InvokeRequired required compares the thread ID of the 
+'        '// calling thread to the thread ID of the creating thread. 
+'        '// If these threads are different, it returns true. 
+'        If (ctrl.InvokeRequired) Then
+'            Dim d As New SetTextCallback(Sub(SetText(form, ctrl, text)) )
+'            form.Invoke(d)
+'        Else
+'            ctrl.Text = text
+'        End If
+'    End Sub
+'End Class

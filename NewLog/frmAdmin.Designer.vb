@@ -36,13 +36,17 @@ Partial Class frmAdmin
         Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.AddToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnComments = New System.Windows.Forms.Button()
+        Me.cmsUpdatePerms = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.UpdatePermissionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.Panel1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.ContextMenuStrip1.SuspendLayout()
+        Me.cmsUpdatePerms.SuspendLayout()
         Me.SuspendLayout()
         '
         'lstUsers
         '
+        Me.lstUsers.ContextMenuStrip = Me.cmsUpdatePerms
         Me.lstUsers.Dock = System.Windows.Forms.DockStyle.Right
         Me.lstUsers.FormattingEnabled = True
         Me.lstUsers.Location = New System.Drawing.Point(499, 0)
@@ -157,6 +161,18 @@ Partial Class frmAdmin
         Me.btnComments.Text = "View Comments"
         Me.btnComments.UseVisualStyleBackColor = True
         '
+        'cmsUpdatePerms
+        '
+        Me.cmsUpdatePerms.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.UpdatePermissionsToolStripMenuItem})
+        Me.cmsUpdatePerms.Name = "cmsUpdatePerms"
+        Me.cmsUpdatePerms.Size = New System.Drawing.Size(179, 26)
+        '
+        'UpdatePermissionsToolStripMenuItem
+        '
+        Me.UpdatePermissionsToolStripMenuItem.Name = "UpdatePermissionsToolStripMenuItem"
+        Me.UpdatePermissionsToolStripMenuItem.Size = New System.Drawing.Size(178, 22)
+        Me.UpdatePermissionsToolStripMenuItem.Text = "Update Permissions"
+        '
         'frmAdmin
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -183,6 +199,7 @@ Partial Class frmAdmin
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
         Me.ContextMenuStrip1.ResumeLayout(False)
+        Me.cmsUpdatePerms.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -199,4 +216,6 @@ Partial Class frmAdmin
     Friend WithEvents ContextMenuStrip1 As ContextMenuStrip
     Friend WithEvents AddToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents btnComments As Button
+    Friend WithEvents cmsUpdatePerms As ContextMenuStrip
+    Friend WithEvents UpdatePermissionsToolStripMenuItem As ToolStripMenuItem
 End Class

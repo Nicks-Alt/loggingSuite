@@ -96,7 +96,9 @@ Public Class frmAdmin
     End Sub
 
     Private Sub frmAdmin_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
-        frmLoggingSuite.Show()
+        If frmLoggingSuite.blnIsAdmin = False Then
+            frmLoggingSuite.Show()
+        End If
     End Sub
 
     Private Sub lstGoalM_Leave(sender As Object, e As EventArgs) Handles lstGoalM.Leave
@@ -172,5 +174,33 @@ Public Class frmAdmin
         MsgBox(strLogs, vbInformation, "LOGS(" + currentMonday.ToLongDateString + ") | " + lstUsers.SelectedItem.ToString.ToUpper)
         currentMonday = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
         con.Close()
+    End Sub
+
+    Private Sub UpdatePermissionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UpdatePermissionsToolStripMenuItem.Click
+        Dim getCurrentRank As String
+        con.Open()
+        Dim sqlforRank As New OleDbDataAdapter("SELECT IsAdmin FROM Users WHERE [_Name] = '" + lstUsers.SelectedItem.ToString() + "'", con)
+        Dim rankTable As New DataTable
+        sqlforRank.Fill(rankTable)
+        con.Close()
+        If rankTable.Rows(0).ItemArray(0) = "False" Then
+            getCurrentRank = "User"
+        Else
+            getCurrentRank = "Admin"
+        End If
+        Dim input As String = InputBox("Enter new Permissions for " + lstUsers.SelectedItem.ToString() + "." + Environment.NewLine + Environment.NewLine + "CURRENT RANK: " + getCurrentRank + Environment.NewLine + "0: User" + Environment.NewLine + "1: Admin")
+        If input = "1" Then
+            con.Open()
+            Dim sqlCommand As New OleDbCommand("UPDATE Users SET IsAdmin = True WHERE [_Name] = '" + lstUsers.SelectedItem.ToString() + "'", con)
+            sqlCommand.ExecuteNonQuery()
+            con.Close()
+        ElseIf input = "0" Then
+            con.Open()
+            Dim sqlCommand As New OleDbCommand("UPDATE Users SET IsAdmin = False WHERE [_Name] = '" + lstUsers.SelectedItem.ToString() + "'", con)
+            sqlCommand.ExecuteNonQuery()
+            con.Close()
+        ElseIf input <> "" Then
+            MsgBox("You did not enter 0 or 1. Please enter 0 if you would like to change the user to a regular user, and 1 to an admin.")
+        End If
     End Sub
 End Class
