@@ -203,4 +203,97 @@ Public Class frmAdmin
             MsgBox("You did not enter 0 or 1. Please enter 0 if you would like to change the user to a regular user, and 1 to an admin.")
         End If
     End Sub
+
+    'Private Sub cmsEditObj_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles cmsEditObj.Opening
+    '    If lstDailyObjectives.SelectedIndex = -1 Then
+    '        e.Cancel = True
+    '    End If
+    'End Sub
+    Private Sub SaveObjectives()
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
+        Try
+            Dim objectiveCmd As New OleDbCommand
+            objectiveCmd.Connection = con
+            If lstDailyObjectives.Items.Count = 1 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString
+            ElseIf lstDailyObjectives.Items.Count = 2 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString()
+            ElseIf lstDailyObjectives.Items.Count = 3 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString
+            ElseIf lstDailyObjectives.Items.Count = 4 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString
+            ElseIf lstDailyObjectives.Items.Count = 5 Then
+                objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString + "', [_FridayObj] = '" + lstDailyObjectives.Items.Item(4).ToString
+            End If
+            objectiveCmd.CommandText += "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'"
+            objectiveCmd.ExecuteNonQuery()
+        Catch ex As Exception
+            MsgBox("Error when saving objectives to the database. Make sure it is not readonly." + Environment.NewLine + Environment.NewLine + "Exception Text:" + Environment.NewLine + ex.Message, MsgBoxStyle.Critical, "ERROR")
+            ForceClose()
+        End Try
+        con.Close()
+    End Sub
+    Private Sub SaveGoal()
+        If con.State <> ConnectionState.Open Then
+            con.Open()
+        End If
+        Dim goalCmd As New OleDbCommand("UPDATE Goal SET [_Entry] = '" + lstGoalM.Items.Item(0).ToString + "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+        goalCmd.ExecuteNonQuery()
+        con.Close()
+    End Sub
+    Private Sub ForceClose()
+        Shell("taskkill /pid " + Process.GetCurrentProcess().Id.ToString + " /f /t")
+    End Sub
+
+    'Private Sub cmsEditGoal_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles cmsEditGoal.Opening
+    '    If lstGoalM.SelectedIndex = -1 Then
+    '        e.Cancel = True
+    '    End If
+    'End Sub
+
+    Private Sub EditToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EditToolStripMenuItem.Click, EditObj.Click
+        Dim strEditedItem As String = InputBox("Editing: " & Environment.NewLine & Environment.NewLine & lstDailyObjectives.SelectedItem.ToString(), "Editing Item #" + (lstDailyObjectives.SelectedIndex + 1).ToString(), lstDailyObjectives.SelectedItem.ToString)
+        If strEditedItem <> "" Then
+            lstDailyObjectives.Items.Insert(lstDailyObjectives.SelectedIndex, strEditedItem)
+            lstDailyObjectives.Items.RemoveAt(lstDailyObjectives.SelectedIndex)
+            SaveObjectives()
+        End If
+    End Sub
+
+    Private Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem1.Click, EditGoal.Click
+        Dim strEditedItem As String = InputBox("Editing: " & Environment.NewLine & Environment.NewLine & lstGoalM.SelectedItem.ToString(), "Editing Goal", lstGoalM.SelectedItem.ToString)
+        If strEditedItem <> "" Then
+            lstGoalM.Items.Insert(lstGoalM.SelectedIndex, strEditedItem)
+            lstGoalM.Items.RemoveAt(lstGoalM.SelectedIndex)
+            SaveGoal()
+        End If
+    End Sub
+
+    Private Sub lstDailyObjectives_SelectedIndexChanged(sender As Object, e As MouseEventArgs) Handles lstDailyObjectives.MouseDown
+        'ContextMenuStrip1.Parent = lstDailyObjectives
+        If e.Button = MouseButtons.Right And lstDailyObjectives.SelectedIndex = -1 Then
+            ContextMenuStrip1.Items(1).Enabled = False
+            ContextMenuStrip1.Items(2).Enabled = False
+            ContextMenuStrip1.Show()
+        ElseIf e.Button = MouseButtons.Right And lstDailyObjectives.SelectedIndex <> -1 Then
+            ContextMenuStrip1.Items(1).Enabled = True
+            ContextMenuStrip1.Items(2).Enabled = False
+            ContextMenuStrip1.Show()
+        End If
+    End Sub
+
+    Private Sub lstGoalM_MouseDown(sender As Object, e As MouseEventArgs) Handles lstGoalM.MouseDown
+        'ContextMenuStrip1.Parent = lstGoalM
+        If e.Button = MouseButtons.Right And lstGoalM.SelectedIndex = -1 Then
+            ContextMenuStrip1.Items(1).Enabled = False
+            ContextMenuStrip1.Items(2).Enabled = False
+            ContextMenuStrip1.Show()
+        ElseIf e.Button = MouseButtons.Right And lstGoalM.SelectedIndex <> -1 Then
+            ContextMenuStrip1.Items(1).Enabled = False
+            ContextMenuStrip1.Items(2).Enabled = True
+            ContextMenuStrip1.Show()
+        End If
+    End Sub
 End Class

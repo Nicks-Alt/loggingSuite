@@ -12,7 +12,7 @@ Public Class frmLoggingSuite
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
     Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='#REDACTED'") ' replace #REDACTED with db password provided in logging suite admin documentation
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='#REDACTED#'") ' replace #REDACTED with db password provided in logging suite admin documentation
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     Private seenComment As Boolean
@@ -62,7 +62,7 @@ Public Class frmLoggingSuite
             ' No objective for that day? Let's just say that they were absent.
             For i = 2 To Now.DayOfWeek + 1
                 If objectiveTable.Rows(0).Item(i).ToString = "" AndAlso i < Now.DayOfWeek + 1 Then
-                    lstDailyObjectives.Items.Add("Absent.")
+                    lstDailyObjectives.Items.Add("[SYSTEM]: No Objective Entered.")
                 Else
                     lstDailyObjectives.Items.Add(objectiveTable.Rows(0).Item(i).ToString)
                 End If
@@ -478,7 +478,7 @@ Public Class frmLoggingSuite
             MessageBox.Show(lstGoalM.SelectedItem.ToString(), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
     End Sub
-    Private Sub SaveObjectives()
+    Friend Sub SaveObjectives()
         If con.State <> ConnectionState.Open Then
             con.Open()
         End If
@@ -636,7 +636,7 @@ Public Class frmLoggingSuite
     End Sub
 
     Private Sub ContextMenuStrip1_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles ContextMenuStrip1.Opening
-        If lstDailyObjectives.SelectedIndex = -1 Then
+        If lstDailyObjectives.SelectedIndex <> Now.DayOfWeek - 1 Then
             e.Cancel = True
         End If
     End Sub
