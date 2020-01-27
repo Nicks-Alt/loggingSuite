@@ -3,7 +3,7 @@
 
 ## *Installation Instructions:*
 1. Download the latest exe from [here](https://github.com/nicksuperiorservers/loggingSuite/releases/latest).
-2. Run the program. If the program asks you for your goal in a little dialog input box, then it has ran successfully, if not, make an issue report on the github repository [here](https://github.com/nicksuperiorservers/loggingSuite/issues/new).
+2. Run the program. If the program asks you for your goal in a little dialog input box, then it has ran successfully, if not, make an issue report on the github repository [here](https://github.com/nicksuperiorservers/loggingSuite/issues/new). <br>
 2a. If Avast takes the executeable for <a href = https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Interro.png>Interrogation</a>, press <b>More details</b> and Click on <b>I Trust This File</b>. After that, Press <b>Settings</b> then Click on the bubble that shows <b>"Allow me to decide"</b>. Finally, run the program again and click on More options in the Avast popup and click <b>Run Anyway</b>.
 
 ## *General Information:*
