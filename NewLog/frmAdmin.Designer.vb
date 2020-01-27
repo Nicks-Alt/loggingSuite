@@ -30,13 +30,9 @@ Partial Class frmAdmin
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.lstDailyObjectives = New System.Windows.Forms.ListBox()
-        Me.cmsEditObj = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.EditToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.lblGoalM = New System.Windows.Forms.Label()
         Me.lstGoalM = New System.Windows.Forms.ListBox()
-        Me.cmsEditGoal = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.DateTimePicker1 = New System.Windows.Forms.DateTimePicker()
         Me.btnViewLog = New System.Windows.Forms.Button()
         Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
@@ -44,12 +40,16 @@ Partial Class frmAdmin
         Me.EditObj = New System.Windows.Forms.ToolStripMenuItem()
         Me.EditGoal = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnComments = New System.Windows.Forms.Button()
+        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsEditGoal = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.EditToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsEditObj = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.cmsUpdatePerms.SuspendLayout()
         Me.Panel1.SuspendLayout()
-        Me.cmsEditObj.SuspendLayout()
         Me.Panel2.SuspendLayout()
-        Me.cmsEditGoal.SuspendLayout()
         Me.ContextMenuStrip1.SuspendLayout()
+        Me.cmsEditGoal.SuspendLayout()
+        Me.cmsEditObj.SuspendLayout()
         Me.SuspendLayout()
         '
         'lstUsers
@@ -105,18 +105,6 @@ Partial Class frmAdmin
         Me.lstDailyObjectives.Size = New System.Drawing.Size(492, 78)
         Me.lstDailyObjectives.TabIndex = 21
         '
-        'cmsEditObj
-        '
-        Me.cmsEditObj.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.EditToolStripMenuItem})
-        Me.cmsEditObj.Name = "ContextMenuStrip1"
-        Me.cmsEditObj.Size = New System.Drawing.Size(95, 26)
-        '
-        'EditToolStripMenuItem
-        '
-        Me.EditToolStripMenuItem.Name = "EditToolStripMenuItem"
-        Me.EditToolStripMenuItem.Size = New System.Drawing.Size(94, 22)
-        Me.EditToolStripMenuItem.Text = "Edit"
-        '
         'Panel2
         '
         Me.Panel2.BackColor = System.Drawing.Color.IndianRed
@@ -147,18 +135,6 @@ Partial Class frmAdmin
         Me.lstGoalM.Name = "lstGoalM"
         Me.lstGoalM.Size = New System.Drawing.Size(492, 39)
         Me.lstGoalM.TabIndex = 23
-        '
-        'cmsEditGoal
-        '
-        Me.cmsEditGoal.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripMenuItem1})
-        Me.cmsEditGoal.Name = "ContextMenuStrip1"
-        Me.cmsEditGoal.Size = New System.Drawing.Size(95, 26)
-        '
-        'ToolStripMenuItem1
-        '
-        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(94, 22)
-        Me.ToolStripMenuItem1.Text = "Edit"
         '
         'DateTimePicker1
         '
@@ -217,6 +193,30 @@ Partial Class frmAdmin
         Me.btnComments.Text = "View Comments"
         Me.btnComments.UseVisualStyleBackColor = True
         '
+        'ToolStripMenuItem1
+        '
+        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(94, 22)
+        Me.ToolStripMenuItem1.Text = "Edit"
+        '
+        'cmsEditGoal
+        '
+        Me.cmsEditGoal.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripMenuItem1})
+        Me.cmsEditGoal.Name = "ContextMenuStrip1"
+        Me.cmsEditGoal.Size = New System.Drawing.Size(95, 26)
+        '
+        'EditToolStripMenuItem
+        '
+        Me.EditToolStripMenuItem.Name = "EditToolStripMenuItem"
+        Me.EditToolStripMenuItem.Size = New System.Drawing.Size(94, 22)
+        Me.EditToolStripMenuItem.Text = "Edit"
+        '
+        'cmsEditObj
+        '
+        Me.cmsEditObj.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.EditToolStripMenuItem})
+        Me.cmsEditObj.Name = "ContextMenuStrip1"
+        Me.cmsEditObj.Size = New System.Drawing.Size(95, 26)
+        '
         'frmAdmin
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -241,11 +241,11 @@ Partial Class frmAdmin
         Me.cmsUpdatePerms.ResumeLayout(False)
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
-        Me.cmsEditObj.ResumeLayout(False)
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
-        Me.cmsEditGoal.ResumeLayout(False)
         Me.ContextMenuStrip1.ResumeLayout(False)
+        Me.cmsEditGoal.ResumeLayout(False)
+        Me.cmsEditObj.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -264,10 +264,10 @@ Partial Class frmAdmin
     Friend WithEvents btnComments As Button
     Friend WithEvents cmsUpdatePerms As ContextMenuStrip
     Friend WithEvents UpdatePermissionsToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents cmsEditObj As ContextMenuStrip
-    Friend WithEvents EditToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents cmsEditGoal As ContextMenuStrip
-    Friend WithEvents ToolStripMenuItem1 As ToolStripMenuItem
     Friend WithEvents EditObj As ToolStripMenuItem
     Friend WithEvents EditGoal As ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem1 As ToolStripMenuItem
+    Friend WithEvents cmsEditGoal As ContextMenuStrip
+    Friend WithEvents EditToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents cmsEditObj As ContextMenuStrip
 End Class

@@ -114,15 +114,16 @@ Public Class frmAdmin
     End Sub
 
     Private Sub AddToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AddToolStripMenuItem.Click
-        If con.State <> ConnectionState.Open Then
-            con.Open()
-        End If
         Dim comment As String = InputBox("Enter comment for " + lstUsers.SelectedItem.ToString(), "Adding comment...", " ")
         Dim blnCancel As Boolean
         Do
             If comment <> "" Then
+                If con.State <> ConnectionState.Open Then
+                    con.Open()
+                End If
                 Dim objInsertCmd As New OleDbCommand("INSERT INTO Comments (_UName, _Date, _Entry, _Read) VALUES ('" + lstUsers.SelectedItem.ToString + "', '" + Now.ToShortDateString + "', '" + comment + "', '0')", con)
                 objInsertCmd.ExecuteNonQuery()
+                con.Close()
                 blnCancel = True
                 btnComments.Enabled = True
             Else
@@ -227,7 +228,7 @@ Public Class frmAdmin
             ElseIf lstDailyObjectives.Items.Count = 5 Then
                 objectiveCmd.CommandText = "UPDATE Objectives SET [_MondayObj] = '" + lstDailyObjectives.Items.Item(0).ToString + "', [_TuesdayObj] = '" + lstDailyObjectives.Items.Item(1).ToString() + "', [_WednesdayObj] = '" + lstDailyObjectives.Items.Item(2).ToString + "', [_ThursdayObj] = '" + lstDailyObjectives.Items.Item(3).ToString + "', [_FridayObj] = '" + lstDailyObjectives.Items.Item(4).ToString
             End If
-            objectiveCmd.CommandText += "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'"
+            objectiveCmd.CommandText += "' WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString() + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'"
             objectiveCmd.ExecuteNonQuery()
         Catch ex As Exception
             MsgBox("Error when saving objectives to the database. Make sure it is not readonly." + Environment.NewLine + Environment.NewLine + "Exception Text:" + Environment.NewLine + ex.Message, MsgBoxStyle.Critical, "ERROR")
@@ -239,7 +240,7 @@ Public Class frmAdmin
         If con.State <> ConnectionState.Open Then
             con.Open()
         End If
-        Dim goalCmd As New OleDbCommand("UPDATE Goal SET [_Entry] = '" + lstGoalM.Items.Item(0).ToString + "' WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
+        Dim goalCmd As New OleDbCommand("UPDATE Goal SET [_Entry] = '" + lstGoalM.Items.Item(0).ToString + "' WHERE [_UName] LIKE '" + lstUsers.SelectedItem.ToString() + "' AND [_MondayDate] LIKE '" + currentMonday.ToShortDateString + "'", con)
         goalCmd.ExecuteNonQuery()
         con.Close()
     End Sub

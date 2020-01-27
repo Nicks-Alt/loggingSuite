@@ -215,6 +215,7 @@ Public Class frmLoggingSuite
         Dim commentTable As New DataTable
         Dim commentAdapter As New OleDbDataAdapter("SELECT * FROM Comments WHERE [_UName] LIKE '" + Environment.UserName + "' AND [_Read] LIKE '0'", con)
         commentAdapter.Fill(commentTable)
+        con.Close()
         If commentTable.Rows.Count <> 0 Then
             commentWarning.Visible = True
             If seenComment = False Then
@@ -232,7 +233,6 @@ Public Class frmLoggingSuite
             commentWarning.Visible = False
             seenComment = False
         End If
-        con.Close()
     End Sub
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         lblClock.Text = Now.ToLongTimeString
@@ -673,6 +673,16 @@ Public Class frmLoggingSuite
 
     Private Sub commentWarning_Click(sender As Object, e As EventArgs) Handles commentWarning.Click
         frmComments.ShowDialog()
+    End Sub
+
+    Private Sub frmLoggingSuite_VisibleChanged(sender As Object, e As EventArgs) Handles MyBase.VisibleChanged
+        Check4Comments(Me, New EventArgs)
+    End Sub
+
+    Private Sub frmLoggingSuite_Click(sender As Object, e As EventArgs) Handles MyBase.Click
+        If commentWarning.Visible = False Then
+            Check4Comments(Me, New EventArgs)
+        End If
     End Sub
 End Class
 'Public Class ThreadHelperClass ' Because fuck threads And Me Not allowing To just Set text On a label Like a normal person
