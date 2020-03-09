@@ -26,7 +26,7 @@
   ![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/avast1.png)<br>
   2) In the virus chest menu, click on the 3 dots next to the application you wish to restore.<br>
   ![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast2.png)<br>
-  3) Click <b>Restore & Add Exception<b>.<br>
+  3) Click <b>Restore & Add Exception</b>.<br>
   ![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast3.png)<br>
 ## *Other Features:*
 ![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png)
