@@ -7,7 +7,7 @@
 2a. If Avast takes the executeable for <a href = https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Interro.png>Interrogation</a>, press <b>More details</b> and Click on <b>I Trust This File</b>. After that, Press <b>Settings</b> then Click on the bubble that shows <b>"Allow me to decide"</b>. Finally, run the program again and click on More options in the Avast popup and click <b>Run Anyway</b>.
 
 ## *General Information:*
-- Everyday the program will launch when the computer starts. It also creates a Desktop shortcut.
+- Everyday the program will launch when the computer starts. It also creates a Desktop shortcut.<br>
 ## *Daily Objectives:*
 - Whenever the program starts, it will ask for your objective for the day if you have not already entered it for the day.
 - After entering your objective, it will add it to a listbox on the main form.
@@ -29,4 +29,4 @@
   3) Click <b>Restore & Add Exception</b>.<br>
   ![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast3.png)<br>
 ## *Other Features:*
-![t](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png)
+![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png)
