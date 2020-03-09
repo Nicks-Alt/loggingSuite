@@ -29,4 +29,4 @@
   3) Click <b>Restore & Add Exception</b>.<br>
   ![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast3.png)<br>
 ## *Other Features:*
-![](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png)
+![t](https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/AllFeatures.png)
