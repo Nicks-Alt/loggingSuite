@@ -23,7 +23,7 @@
 <h1> <b><i>The Logging Suite & Avast:</i></b> </h1>
 - Since avast is a very sensitive Anti-Virus, it will sometimes quarentine the .exe as a false positive. In order to add an exception for Avast, do the following:
   1) Expand the Windows Task Bar context menu to locate the avast icon and right click. Select the <b>Virus Chest</b> option.<br>
-<img src="https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/avast1.png"><br>
+<img src="https://raw.githubusercontent.com/nicksuperiorservers/loggingSuite/master/Images/avast1.png"><br>
   2) In the virus chest menu, click on the 3 dots next to the application you wish to restore.<br>
   <img src="https://github.com/nicksuperiorservers/loggingSuite/blob/master/Images/Avast2.png"><br>
   3) Click <b>Restore & Add Exception</b>.<br>
