@@ -11,14 +11,37 @@ Public Class frmLoggingSuite
     Private Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Short
     Friend strReminderTime As String
     Friend currentMonday As Date = Today.AddDays(-(Today.DayOfWeek - DayOfWeek.Monday))
-    Friend logFolderName As String = "P:" & "\Weekly Logs\" + Environment.UserName + "\" + currentMonday.ToLongDateString()
-    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=P:\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='#REDACTED#'") ' replace #REDACTED with db password provided in logging suite admin documentation
+    Friend con As New OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=\\wcispdata\Public\Weekly Logs\LoggingSuiteDatabase.mdb;Jet OLEDB:Database Password='Database'") ' replace #REDACTED# with db password provided in logging suite admin documentation
     Private reminderConfigFileName As String = "remindertime.cfg"
     Private NormalSize As Size
     Private seenComment As Boolean
     Friend blnIsAdmin As Boolean = False
     'Friend commentFileNames As New List(Of FileInfo)
     'TODO: https://github.com/nicksuperiorservers/loggingSuite/issues
+    '''' <summary>
+    '''' Gets the UNC source path from a network drive
+    '''' </summary>
+    '''' <param name="driveLetter">The Drive letter to use</param>
+    '''' <returns></returns>
+    'Private Shared Function GetUncSourcePath(ByVal driveLetter As Char) As String ' This is gross and wack, but just go along with it
+    '    If String.IsNullOrEmpty(driveLetter) Then Throw New ArgumentNullException("driveLetter")
+    '    If (driveLetter < "a"c OrElse driveLetter > "z") AndAlso (driveLetter < "A"c OrElse driveLetter > "Z") Then Throw New ArgumentOutOfRangeException("driveLetter", "driveLetter must be a letter from A to Z")
+    '    Dim P As New Process()
+    '    With P.StartInfo
+    '        .FileName = "NET"
+    '        .Arguments = String.Format("USE {0}:", driveLetter)
+    '        .UseShellExecute = False
+    '        .RedirectStandardOutput = True
+    '        .CreateNoWindow = True
+    '    End With
+    '    P.Start()
+    '    Dim T = P.StandardOutput.ReadToEnd()
+    '    P.WaitForExit()
+    '    For Each Line In Split(T, vbNewLine)
+    '        If Line.StartsWith("Remote name") Then Return Line.Replace("Remote name", "").Trim()
+    '    Next
+    '    Return Nothing
+    'End Function
     ''' <summary>
     ''' Loads the logging information for the currently logged on user. Fills the Objectives/Goal panels on startup.
     ''' </summary>
@@ -152,7 +175,6 @@ Public Class frmLoggingSuite
                         i = False
                     End If
                 Loop While i
-                'lstDailyObjectives.Items.AddRange({"Absent.", "Absent.", "Absent.", "Absent.", "Absent."})
                 Select Case Today.DayOfWeek
                     Case DayOfWeek.Monday
                         lstDailyObjectives.Items.Insert(0, dailyObj)
@@ -205,9 +227,6 @@ Public Class frmLoggingSuite
             ForceClose()
         End If
     End Sub
-    'Private Sub frmLoggingSuite_Loaded(sender As Object, e As EventArgs) Handles MyBase.HandleCreated
-
-    'End Sub
     Private Sub Check4Comments(sender As Object, e As EventArgs) Handles MyBase.Activated
         If con.State <> ConnectionState.Open Then
             con.Open()
@@ -220,13 +239,14 @@ Public Class frmLoggingSuite
             commentWarning.Visible = True
             If seenComment = False Then
                 Dim notifyIcon As New NotifyIcon
-
-                notifyIcon.Visible = True
-                notifyIcon.Icon = My.Resources.icon
-                notifyIcon.BalloonTipIcon = ToolTipIcon.Warning
-                notifyIcon.BalloonTipTitle = "Logging Suite"
-                notifyIcon.BalloonTipText = "You have new comments!"
-                notifyIcon.ShowBalloonTip(5000)
+                With notifyIcon
+                    .Visible = True
+                    .Icon = My.Resources.icon
+                    .BalloonTipIcon = ToolTipIcon.Warning
+                    .BalloonTipTitle = "Logging Suite"
+                    .BalloonTipText = "You have new comments!"
+                    .ShowBalloonTip(5000)
+                End With
                 seenComment = True
             End If
         Else
@@ -246,7 +266,6 @@ Public Class frmLoggingSuite
             btnAbortShutdown.Visible = True
             Me.Activate()
         End If
-        'Check4Comments(Me, New EventArgs)
     End Sub
     Private Sub btnCopy_Click(sender As Object, e As EventArgs) Handles btnCopy.Click
         If con.State <> ConnectionState.Open Then
@@ -325,14 +344,6 @@ Public Class frmLoggingSuite
         End If
         con.Close()
         Timer1.Start()
-    End Sub
-    Private Sub btnClear_Click(sender As Object, e As EventArgs)
-        Select Case MsgBox("Are you sure you want to clear the file?", MsgBoxStyle.YesNo, "Are you sure?")
-            Case MsgBoxResult.Yes
-                Dim objWriter As New IO.StreamWriter(logFolderName & "Logs.txt", False)
-                objWriter.Close()
-        End Select
-        txtInput.Clear()
     End Sub
     Private Sub btnExit_Click(sender As Object, e As EventArgs)
         Close()
@@ -683,6 +694,10 @@ Public Class frmLoggingSuite
         If commentWarning.Visible = False Then
             Check4Comments(Me, New EventArgs)
         End If
+    End Sub
+
+    Private Sub OptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OptionsToolStripMenuItem.Click
+        frmTransparency.ShowDialog()
     End Sub
 End Class
 'Public Class ThreadHelperClass ' Because fuck threads And Me Not allowing To just Set text On a label Like a normal person

@@ -59,6 +59,7 @@ Partial Class frmLoggingSuite
         Me.lblShutdownTimer = New System.Windows.Forms.Label()
         Me.NotifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.commentWarning = New System.Windows.Forms.PictureBox()
+        Me.OptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.ContextMenuStrip1.SuspendLayout()
         Me.Panel1.SuspendLayout()
@@ -159,7 +160,7 @@ Partial Class frmLoggingSuite
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenSchoologyToolStripMenuItem, Me.AdminLoginToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OpenSchoologyToolStripMenuItem, Me.AdminLoginToolStripMenuItem, Me.OptionsToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -398,6 +399,12 @@ Partial Class frmLoggingSuite
         Me.commentWarning.TabStop = False
         Me.commentWarning.Visible = False
         '
+        'OptionsToolStripMenuItem
+        '
+        Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
+        Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(162, 22)
+        Me.OptionsToolStripMenuItem.Text = "Options"
+        '
         'frmLoggingSuite
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -433,7 +440,6 @@ Partial Class frmLoggingSuite
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "frmLoggingSuite"
-        Me.Opacity = 0.8R
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Logging Suite"
         Me.MenuStrip1.ResumeLayout(False)
@@ -484,4 +490,5 @@ Partial Class frmLoggingSuite
     Friend WithEvents ToolStripMenuItem1 As ToolStripMenuItem
     Friend WithEvents NotifyIcon1 As NotifyIcon
     Friend WithEvents commentWarning As PictureBox
+    Friend WithEvents OptionsToolStripMenuItem As ToolStripMenuItem
 End Class

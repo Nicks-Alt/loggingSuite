@@ -77,3 +77,4 @@ E:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.exe
 E:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.xml
 E:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.pdb
 E:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.vbprojAssemblyReference.cache
+G:\repos\loggingSuite\NewLog\obj\Debug\loggingSuite.frmTransparency.resources
